@@ -1,18 +1,16 @@
 /*
- * dark-override.css
- * Injected into legacy pages (dashboard, community, profile, postlost, complaint)
- * to enforce the new obsidian dark design system without rewriting each page's full CSS.
+ * dark-override.css  v3.0
+ * Forces new obsidian dark design + Dynamic Island navbar on ALL legacy pages
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
-/* Force dark background on all legacy pages */
+/* ─── GLOBAL RESET ───────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Inter', 'Poppins', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     background: #080b12 !important;
     background-attachment: fixed !important;
     color: #f0f4ff !important;
@@ -20,51 +18,173 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Kill the old gradient pseudo-element */
 body::before {
+    content: '' !important;
+    position: fixed !important;
+    top: 0; left: 0; width: 100%; height: 100% !important;
     background:
         radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,110,245,0.12) 0%, transparent 60%),
         radial-gradient(ellipse 60% 50% at 80% 80%, rgba(34,211,238,0.08) 0%, transparent 60%) !important;
     animation: none !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+body::after { display: none !important; }
+
+h1, h2, h3, h4, h5 { font-family: 'Outfit', sans-serif !important; }
+
+/* ─── KILL ALL OLD NAVBARS ───────────────────── */
+/*
+   Every legacy page has a .navbar with its own fixed/full-width CSS.
+   We nuke all of that and let style.css take over with the island pill.
+*/
+.navbar {
+    /* Island pill overrides — mirror style.css exactly */
+    position: fixed !important;
+    top: 16px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(12,15,25,0.88) !important;
+    backdrop-filter: blur(28px) saturate(1.8) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 50px !important;
+    padding: 10px 20px 10px 16px !important;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset !important;
+    width: auto !important;
+    max-width: 95vw !important;
+    min-width: unset !important;
+    /* Kill any old layout properties */
+    justify-content: unset !important;
+    flex-direction: row !important;
 }
 
-body::after { display: none; }
-
-/* Override any old gradient backgrounds */
-.glass, [class*="glass"],
-.card, [class*="card"],
-.form-card, .stat-card,
-.item-card, .dashboard-card,
-.post-card, .community-card {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    backdrop-filter: blur(20px) !important;
+.navbar.island-contracted {
+    padding: 8px 16px 8px 14px !important;
+    background: rgba(8,11,18,0.95) !important;
 }
 
-/* Override old navbars — the new island is from style.css */
-.navbar.old-navbar,
-nav.old-navbar {
-    display: none;
-}
+/* Kill old nav wrappers that pages use */
+.nav-container, .navbar-container,
+.nav-wrapper, .header-wrapper { display: contents !important; }
 
-/* Headings gradient */
-h1, h2, h3 { font-family: 'Outfit', sans-serif !important; }
-
-h1[class*="title"], h2[class*="title"],
-.page-title, .section-title {
-    background: linear-gradient(135deg, #fff 30%, #a89af8) !important;
+/* Logo */
+.navbar .logo, .logo {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #7c6ef5, #a89af8, #22d3ee) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
+    letter-spacing: -0.3px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    text-decoration: none !important;
 }
 
-/* Buttons */
-button, .btn, [class*="btn"] {
-    font-family: 'Outfit', sans-serif !important;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+/* Nav links row */
+.nav-links {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    position: static !important;
+    width: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    flex-direction: row !important;
 }
 
-/* Inputs */
+.nav-links a, .nav-links > a {
+    text-decoration: none !important;
+    color: rgba(200,210,240,0.6) !important;
+    font-weight: 500 !important;
+    font-size: 0.82rem !important;
+    padding: 6px 10px !important;
+    border-radius: 20px !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+    border: none !important;
+    background: transparent !important;
+    opacity: 1 !important;
+    width: auto !important;
+    text-align: left !important;
+}
+
+.nav-links a:hover {
+    color: #f0f4ff !important;
+    background: rgba(255,255,255,0.08) !important;
+    transform: none !important;
+}
+
+.nav-links a.active-link {
+    color: #a89af8 !important;
+    background: rgba(124,110,245,0.15) !important;
+}
+
+.island-sep {
+    width: 1px !important;
+    height: 20px !important;
+    background: rgba(255,255,255,0.1) !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+}
+
+/* Island bell */
+.island-bell { display: flex; align-items: center; flex-shrink: 0; }
+
+/* Kill old hamburger / theme toggles */
+.nav-toggle { display: none !important; }
+.theme-icon, #themeToggle { display: none !important; }
+
+/* Mobile drawer (from session.js) still works */
+.mobile-nav-drawer { display: none; }
+.mobile-nav-drawer.open { display: flex !important; }
+
+/* ─── PAGE CONTENT SPACING ───────────────────── */
+.main, .dashboard-main, .community-main,
+.page-content, .content-wrapper,
+.report-container, .complaint-container,
+.profile-container, .admin-container {
+    padding-top: 90px !important;
+}
+
+/* dashboard uses .main class */
+.main { padding: 90px 5% 40px !important; }
+
+/* ─── CARDS & GLASS ──────────────────────────── */
+.glass,
+.stat-card, .item-card, .post-card,
+.dashboard-card, .form-card,
+.community-card, .profile-card,
+.report-card, .filter-card,
+[class*="-card"], [class*="glass"] {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    color: #f0f4ff !important;
+}
+
+[class*="-card"]:hover {
+    border-color: rgba(124,110,245,0.3) !important;
+    background: rgba(255,255,255,0.07) !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4) !important;
+    transform: translateY(-4px) !important;
+}
+
+/* ─── INPUTS ─────────────────────────────────── */
 input, select, textarea {
     background: rgba(255,255,255,0.05) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
@@ -90,15 +210,65 @@ label {
     font-weight: 500 !important;
 }
 
-/* Override any old colourful gradients on cards */
-[style*="background: linear-gradient(135deg, #667"],
-[style*="background: linear-gradient(135deg, #764"],
-[style*="background: linear-gradient(135deg, #f09"] {
-    background: rgba(255,255,255,0.04) !important;
+select option { background: #0d1117 !important; color: #f0f4ff !important; }
+
+/* ─── BUTTONS ────────────────────────────────── */
+button, .btn, .btn-submit,
+[class*="btn-"] {
+    font-family: 'Outfit', sans-serif !important;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    cursor: pointer !important;
 }
 
+/* Gradient primary buttons */
+.btn-primary, .btn-submit, .btn-premium,
+.submit-btn, [class*="btn-primary"],
+button[type="submit"] {
+    background: linear-gradient(135deg, #7c6ef5, #22d3ee) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+button[type="submit"]:hover, .btn-primary:hover, .btn-submit:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(124,110,245,0.4) !important;
+    filter: brightness(1.1) !important;
+}
+
+/* ─── TABS / FILTERS ─────────────────────────── */
+.tab-btn, .filter-btn, [class*="tab-"],
+[class*="filter-btn"] {
+    border-radius: 50px !important;
+    transition: all 0.25s ease !important;
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: rgba(200,210,240,0.6) !important;
+}
+
+.tab-btn.active, .filter-btn.active,
+.tab-btn:hover, .filter-btn:hover {
+    background: rgba(124,110,245,0.15) !important;
+    border-color: rgba(124,110,245,0.3) !important;
+    color: #a89af8 !important;
+}
+
+/* ─── TYPOGRAPHY ─────────────────────────────── */
+.section-title, .page-title, h1, h2 {
+    color: #f0f4ff !important;
+    -webkit-text-fill-color: unset !important;
+}
+
+/* Kill old colourful text gradients */
+[style*="color: #ffd369"], [style*="color:#ffd369"],
+[style*="-webkit-text-fill-color"] {
+    -webkit-text-fill-color: #f0f4ff !important;
+}
+
+p, span, div { color: inherit; }
+
 /* Status badges */
-.status-badge, [class*="status-"] {
+.status-badge, [class*="status-badge"] {
     border-radius: 50px !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
@@ -106,39 +276,37 @@ label {
     padding: 3px 10px !important;
 }
 
-/* Tab buttons */
-.tab-btn, [class*="tab-"] {
-    border-radius: 50px !important;
-    transition: all 0.25s ease !important;
-}
-
-/* Scrollbar */
+/* ─── SCROLLBAR ──────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(124,110,245,0.4); }
 
-/* Page wrapper spacing for new island nav */
-.page-wrapper, .dashboard-wrapper, .community-wrapper,
-.profile-container, .complaint-container, .report-container,
-main, .main-container {
-    padding-top: 90px !important;
-}
-
-/* Glow accents on hover cards */
-.item-card:hover, .post-card:hover,
-.dashboard-card:hover, .feature-card:hover {
-    border-color: rgba(124,110,245,0.3) !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.4) !important;
-    transform: translateY(-4px) !important;
-}
-
-/* Accent colour overrides */
+/* ─── CSS VARIABLES OVERRIDE ─────────────────── */
 :root {
     --accent: #a89af8 !important;
     --accent-hover: #7c6ef5 !important;
+    --accent-bright: #a89af8 !important;
     --text-secondary: rgba(200,210,240,0.6) !important;
+    --text-muted: rgba(200,210,240,0.35) !important;
     --glass-bg: rgba(255,255,255,0.04) !important;
     --glass-border: rgba(255,255,255,0.08) !important;
     --primary-gradient: linear-gradient(135deg, #7c6ef5, #22d3ee) !important;
+    --bg-gradient: #080b12 !important;
+    --navbar-bg: rgba(12,15,25,0.88) !important;
+    --input-bg: rgba(255,255,255,0.05) !important;
+}
+
+/* ─── MOBILE ─────────────────────────────────── */
+@media (max-width: 768px) {
+    .navbar {
+        top: 12px !important;
+        padding: 8px 14px 8px 12px !important;
+    }
+
+    .nav-links { display: none !important; }
+    .island-sep { display: none !important; }
+    .nav-toggle { display: flex !important; }
+
+    .main { padding: 80px 16px 40px !important; }
 }
