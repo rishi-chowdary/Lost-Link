@@ -67,6 +67,7 @@
             <input type="text" id="verificationCode" placeholder="6-digit code" maxlength="6" style="text-align: center; font-size: 1.25rem; letter-spacing: 4px; border-color: var(--accent);">
             
             <button onclick="verifyEmail()" class="btn-premium">Verify & Login</button>
+            <button onclick="resendVerificationCode(document.getElementById('verifyEmail').value)" class="btn-premium" style="background: rgba(255,255,255,0.05); color: #fff; margin-top: 10px; border: 1px solid var(--glass-border);">Resend Code</button>
             <div id="verifyError" class="message error" style="margin-top: 1rem; text-align: center;"></div>
         </div>
     </div>
@@ -123,7 +124,6 @@
         function showVerificationModal(email) {
             document.getElementById('verifyEmail').value = email;
             document.getElementById('verificationModal').style.display = 'flex';
-            resendVerificationCode(email);
         }
 
         function closeVerificationModal() {
