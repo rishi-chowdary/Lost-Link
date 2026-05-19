@@ -84,10 +84,14 @@
     <script src="js/session.js"></script>
     <script>
         async function signInWithGoogle() {
+            const redirectUrl = window.location.pathname.includes('/lostlink/')
+                ? window.location.origin + '/lostlink/dashboard.html'
+                : window.location.origin + '/dashboard.html';
+
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/dashboard.html'
+                    redirectTo: redirectUrl
                 }
             });
 
