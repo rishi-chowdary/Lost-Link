@@ -3,205 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LostLink - Find What's Lost</title>
+    <title>LostLink — Find What's Lost</title>
+    <meta name="description" content="Join thousands of students reconnecting lost items with their owners. Report, search, and recover.">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Unique styles for Landing Page that aren't in shared style.css */
+        /* ── HERO ── */
         .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 180px 20px 120px;
+            padding: 120px 24px 80px;
             position: relative;
+            z-index: 1;
         }
-        
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(124,110,245,0.12);
+            border: 1px solid rgba(124,110,245,0.25);
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-bright);
+            margin-bottom: 2rem;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .hero-eyebrow .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.5; transform:scale(1.5); }
+        }
+
         .hero h1 {
-            font-size: 5rem;
-            font-weight: 800;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            font-weight: 900;
             line-height: 1;
+            letter-spacing: -0.03em;
             margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, #fff, var(--accent));
+            animation: fadeUp 0.7s 0.1s ease both;
+        }
+
+        .hero h1 .line1 { display: block; color: var(--text-primary); }
+        .hero h1 .line2 {
+            display: block;
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shimmerText 4s linear infinite, fadeUp 0.7s 0.1s ease both;
+        }
+
+        @keyframes shimmerText {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
         }
 
         .hero .subtitle {
-            font-size: 1.25rem;
-            max-width: 700px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            max-width: 580px;
             margin: 0 auto 3rem;
             color: var(--text-secondary);
+            line-height: 1.6;
+            animation: fadeUp 0.7s 0.2s ease both;
         }
 
-        .stats-grid {
+        /* Stats Row */
+        .stats-row {
             display: flex;
             justify-content: center;
-            gap: 40px;
-            margin-bottom: 4rem;
-            flex-wrap: wrap;
+            gap: 0;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.7s 0.3s ease both;
         }
 
-        .stat-card {
-            padding: 1.5rem 2.5rem;
-            background: var(--glass-bg);
-            border-radius: 20px;
+        .stat-pill {
+            padding: 16px 28px;
+            background: rgba(255,255,255,0.04);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
 
-        .stat-card:hover { transform: translateY(-5px); }
+        .stat-pill:first-child  { border-radius: 16px 0 0 16px; }
+        .stat-pill:last-child   { border-radius: 0 16px 16px 0; }
+        .stat-pill + .stat-pill { border-left: none; }
 
-        .stat-card .number {
-            font-size: 2.5rem;
+        .stat-pill .num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
             font-weight: 800;
-            color: var(--accent);
-            display: block;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .stat-card .label {
-            font-size: 0.9rem;
+        .stat-pill .lbl {
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.7;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
-        .action-btns {
+        /* CTA */
+        .hero-cta {
             display: flex;
-            gap: 20px;
+            gap: 14px;
             justify-content: center;
-            margin-top: 2rem;
+            flex-wrap: wrap;
+            animation: fadeUp 0.7s 0.35s ease both;
         }
 
-        .btn-landing {
-            padding: 16px 36px;
-            border-radius: 50px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
+        /* Floating card mockup */
+        .hero-visual {
+            margin-top: 5rem;
+            position: relative;
+            animation: fadeUp 0.8s 0.5s ease both;
         }
 
-        .btn-primary-l {
-            background: linear-gradient(45deg, var(--accent), #ff6b6b);
-            color: #1e1b4b;
-            box-shadow: 0 10px 30px rgba(255, 211, 105, 0.3);
-        }
-
-        .btn-secondary-l {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+        .mock-card {
+            background: rgba(15,20,35,0.8);
             border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px 24px;
+            max-width: 360px;
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+            text-align: left;
+            animation: float 4s ease-in-out infinite;
         }
 
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-10px); }
+        }
+
+        .mock-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(124,110,245,0.15);
+            border-radius: 20px;
+            font-size: 0.72rem;
+            color: var(--accent-bright);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .mock-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .mock-card p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .mock-meta {
+            display: flex;
+            gap: 14px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .mock-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── FEATURES ── */
         .features-section {
             padding: 100px 5%;
-            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent-bright);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 60px;
         }
 
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            max-width: 1200px;
+            gap: 20px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
         .feature-card {
-            padding: 40px;
-            background: var(--glass-bg);
-            border-radius: 24px;
+            padding: 36px 30px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
+            transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0;
+            height:1px;
+            background: linear-gradient(90deg,transparent,rgba(124,110,245,0.3),transparent);
+            opacity:0;
+            transition: opacity 0.3s ease;
         }
 
         .feature-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-8px);
+            transform: translateY(-6px);
+            border-color: rgba(124,110,245,0.3);
+            background: var(--bg-card-hover);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
         }
 
-        .feature-icon { font-size: 3rem; margin-bottom: 20px; display: block; }
-        .feature-card h3 { color: var(--accent); margin-bottom: 15px; font-size: 1.5rem; }
-        .feature-card p { color: var(--text-secondary); line-height: 1.6; }
+        .feature-card:hover::before { opacity:1; }
 
+        .feature-icon-wrap {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(124,110,245,0.1);
+            border: 1px solid rgba(124,110,245,0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.88rem;
+        }
+
+        /* ── FOOTER ── */
         footer {
-            padding: 60px 5%;
+            padding: 40px 5%;
             text-align: center;
             border-top: 1px solid var(--glass-border);
-            color: var(--text-secondary);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            position: relative;
+            z-index: 1;
         }
 
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 3.5rem; }
-            .action-btns { flex-direction: column; }
+        footer a { color: var(--text-muted); text-decoration: none; transition: color 0.2s ease; }
+        footer a:hover { color: var(--text-primary); }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .stats-row { flex-direction: column; gap: 0; }
+            .stat-pill:first-child  { border-radius: 16px 16px 0 0; }
+            .stat-pill:last-child   { border-radius: 0 0 16px 16px; }
+            .stat-pill + .stat-pill { border-left: 1px solid var(--glass-border); border-top: none; }
+            .hero-cta { flex-direction: column; align-items: center; }
         }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
+    <!-- DYNAMIC ISLAND NAVBAR -->
     <header class="navbar" id="navbar">
         <div class="logo">LostLink</div>
-        <nav class="nav-links">
-            <!-- Dynamically populated by session.js -->
-        </nav>
+        <nav class="nav-links"><!-- populated by session.js --></nav>
     </header>
 
     <!-- HERO -->
     <section class="hero">
-        <div class="hero-content">
-            <h1>Find What's <span style="color: var(--accent);">Lost</span></h1>
-            <p class="subtitle">Join thousands of students in making college life a little less lost. Report items, help others, and get rewarded.</p>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="number" id="stat-recovered">...</span>
-                    <span class="label">Recovered</span>
-                </div>
-                <div class="stat-card">
-                    <span class="number" id="stat-users">...</span>
-                    <span class="label">Users</span>
-                </div>
-                <div class="stat-card">
-                    <span class="number">24/7</span>
-                    <span class="label">Live</span>
-                </div>
-            </div>
+        <div class="hero-eyebrow">
+            <span class="dot"></span>
+            Live on Campus
+        </div>
 
-            <div class="action-btns" id="hero-buttons">
-                <!-- Dynamically populated -->
+        <h1>
+            <span class="line1">Reconnect the</span>
+            <span class="line2">Lost & Found</span>
+        </h1>
+
+        <p class="subtitle">
+            The smartest way to recover lost items on campus. Report, search, and get reunited — all in real-time.
+        </p>
+
+        <div class="stats-row">
+            <div class="stat-pill">
+                <span class="num" id="stat-recovered">—</span>
+                <span class="lbl">Recovered</span>
+            </div>
+            <div class="stat-pill">
+                <span class="num" id="stat-users">—</span>
+                <span class="lbl">Students</span>
+            </div>
+            <div class="stat-pill">
+                <span class="num">24/7</span>
+                <span class="lbl">Live</span>
+            </div>
+        </div>
+
+        <div class="hero-cta" id="hero-buttons">
+            <!-- populated by session.js -->
+        </div>
+
+        <div class="hero-visual">
+            <div class="mock-card">
+                <div class="mock-tag">📦 Lost Item</div>
+                <h4>iPhone 15 Pro — Matte Black</h4>
+                <p>Lost near Library Block B, Tuesday afternoon. Has a cracked screen protector.</p>
+                <div class="mock-meta">
+                    <span>📍 Library Block B</span>
+                    <span>🕒 2h ago</span>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- FEATURES -->
     <section class="features-section">
-        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">Why LostLink?</h2>
+        <p class="section-label">Why LostLink?</p>
+        <h2 class="section-title">Built for campus life</h2>
+
         <div class="features-grid">
-            <div class="feature-card">
-                <span class="feature-icon">🔍</span>
-                <h3>AI-Powered Search</h3>
-                <p>Intelligent matching systems that connect lost items with their owners instantly based on descriptions.</p>
+            <div class="feature-card" data-animate="fadeUp 0.6s ease both">
+                <div class="feature-icon-wrap">🔍</div>
+                <h3>Smart Matching</h3>
+                <p>Intelligent matching connects lost items with their owners based on descriptions, location, and timing.</p>
             </div>
-            <div class="feature-card">
-                <span class="feature-icon">📱</span>
+            <div class="feature-card" data-animate="fadeUp 0.6s 0.1s ease both">
+                <div class="feature-icon-wrap">⚡</div>
                 <h3>Real-time Alerts</h3>
-                <p>Get notified the moment someone reports an item that matches yours. Never miss a lead.</p>
+                <p>Get notified the moment someone reports an item that matches yours. Instant push notifications.</p>
             </div>
-            <div class="feature-card">
-                <span class="feature-icon">📍</span>
-                <h3>Location Tracking</h3>
-                <p>Precision location marking for where items were last seen or found on campus maps.</p>
+            <div class="feature-card" data-animate="fadeUp 0.6s 0.2s ease both">
+                <div class="feature-icon-wrap">💬</div>
+                <h3>Direct Messaging</h3>
+                <p>Securely connect with finders or reporters through our built-in encrypted chat system.</p>
             </div>
         </div>
     </section>
 
     <!-- FOOTER -->
     <footer>
-        <p>© 2026 LostLink • Reconnecting People with Belongings</p>
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 30px;">
-            <a href="#" style="color: inherit; text-decoration: none;">Privacy</a>
-            <a href="#" style="color: inherit; text-decoration: none;">Terms</a>
-            <a href="#" style="color: inherit; text-decoration: none;">Support</a>
+        <p>© 2026 LostLink — Reconnecting People with Belongings</p>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Support</a>
         </div>
     </footer>
 
@@ -209,16 +407,13 @@
     <script src="js/session.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Fetch real stats
             try {
                 const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
                 const { count: foundCount } = await supabase.from('found_items').select('*', { count: 'exact', head: true });
-                
-                document.getElementById('stat-users').textContent = userCount || 0;
+                document.getElementById('stat-users').textContent     = userCount  || '100+';
                 document.getElementById('stat-recovered').textContent = (foundCount || 0) + '+';
             } catch (e) {
-                console.error("Error loading index stats", e);
-                document.getElementById('stat-users').textContent = '100+';
+                document.getElementById('stat-users').textContent     = '100+';
                 document.getElementById('stat-recovered').textContent = '50+';
             }
         });

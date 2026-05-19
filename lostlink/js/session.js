@@ -91,6 +91,12 @@ class SessionManager {
 
         const isLoggedIn = this.isLoggedIn();
         let isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+        const activeLink = (href) => {
+            const page = href.split('/').pop().split('?')[0];
+            return currentPage === page ? 'class="active-link"' : '';
+        };
 
         if (isLoggedIn) {
             const userId = this.getUserId();
@@ -117,86 +123,113 @@ class SessionManager {
             }
 
             navLinks.innerHTML = `
-                <a href="index.html">Home</a>
-                <a href="dashboard.html">Dashboard</a>
-                <a href="community.html">Community</a>
-                <a href="postlost.html">Report Lost</a>
-                <a href="postlost.html?type=found">Report Found</a>
-                <a href="messages.html">Inbox</a>
-                
-                <!-- Notification Bell Container -->
+                <a href="index.html" ${activeLink('index.html')}>Home</a>
+                <a href="dashboard.html" ${activeLink('dashboard.html')}>Dashboard</a>
+                <a href="community.html" ${activeLink('community.html')}>Community</a>
+                <a href="postlost.html" ${activeLink('postlost.html')}>Report</a>
+                <a href="messages.html" ${activeLink('messages.html')}>Inbox</a>
+                <span class="island-sep"></span>
                 <div class="notification-bell-container" onclick="SessionManager.toggleNotificationDropdown(event)">
                     <span class="bell-icon">🔔</span>
-                    <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
-                    
-                    <!-- Dropdown -->
+                    <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="notification-dropdown-header">
                             <h4>Notifications</h4>
                             <span class="mark-read-btn" onclick="SessionManager.markAllNotificationsAsRead(event)">Mark all read</span>
                         </div>
                         <div class="notification-list" id="notificationList">
-                            <div style="padding: 20px; text-align: center; opacity: 0.5; font-size: 0.85rem;">Loading...</div>
+                            <div style="padding:20px;text-align:center;opacity:0.5;font-size:0.82rem;">Loading...</div>
                         </div>
                         <div class="notification-dropdown-footer">
                             <a href="messages.html">View All Messages</a>
                         </div>
                     </div>
                 </div>
-
-                <a href="profile.html">Profile</a>
-                ${isAdmin 
-                    ? '<a href="admin.html" style="color: var(--accent); font-weight: 700;">Admin</a>' 
-                    : '<a href="complaint.html">Complaint</a>'}
-                <a href="#" onclick="SessionManager.logout(event)">Logout</a>
-                <a href="#" onclick="toggleTheme()" id="themeToggle" class="theme-icon">🌙</a>
+                <a href="profile.html" ${activeLink('profile.html')}>Profile</a>
+                ${isAdmin ? '<a href="admin.html" style="color:var(--accent-bright);font-weight:700;">Admin</a>' : ''}
+                <a href="#" onclick="SessionManager.logout(event)" style="color:rgba(239,68,68,0.8);">Logout</a>
             `;
         } else {
             localStorage.setItem('isAdmin', 'false');
             navLinks.innerHTML = `
-                <a href="index.html">Home</a>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Signup</a>
-                <a href="#" onclick="toggleTheme()" id="themeToggle" class="theme-icon">🌙</a>
+                <a href="index.html" ${activeLink('index.html')}>Home</a>
+                <a href="login.html" ${activeLink('login.html')}>Login</a>
+                <a href="signup.html" ${activeLink('signup.html')}>Sign Up</a>
             `;
         }
 
         this.updateHeroButtons();
-        applySavedTheme();
+        this._buildMobileDrawer();
+    }
 
-        // Dynamic Hamburger Menu Toggle for Responsive Viewports
+    static _buildMobileDrawer() {
+        // Remove old drawer
+        const old = document.getElementById('mobileNavDrawer');
+        if (old) old.remove();
+        const oldToggle = document.querySelector('.nav-toggle');
+        if (oldToggle) oldToggle.remove();
+
+        const isLoggedIn = this.isLoggedIn();
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+        const links = isLoggedIn
+            ? [
+                { href:'index.html', label:'Home' },
+                { href:'dashboard.html', label:'Dashboard' },
+                { href:'community.html', label:'Community' },
+                { href:'postlost.html', label:'Report Lost' },
+                { href:'postlost.html?type=found', label:'Report Found' },
+                { href:'messages.html', label:'Inbox' },
+                { href:'profile.html', label:'Profile' },
+              ]
+            : [
+                { href:'index.html', label:'Home' },
+                { href:'login.html', label:'Login' },
+                { href:'signup.html', label:'Sign Up' },
+              ];
+
+        const drawer = document.createElement('div');
+        drawer.id = 'mobileNavDrawer';
+        drawer.className = 'mobile-nav-drawer';
+        drawer.innerHTML = `
+            <button class="drawer-close" id="drawerClose">&times;</button>
+            ${links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+            ${isLoggedIn ? `<a href="#" onclick="SessionManager.logout(event)" style="color:#f87171;">Logout</a>` : ''}
+        `;
+        document.body.appendChild(drawer);
+
+        // Toggle button inside island
         const navbar = document.querySelector('.navbar');
         if (navbar) {
-            const existingToggle = navbar.querySelector('.nav-toggle');
-            if (existingToggle) existingToggle.remove();
-
             const toggle = document.createElement('button');
             toggle.className = 'nav-toggle';
-            toggle.setAttribute('aria-label', 'Toggle Navigation');
-            toggle.innerHTML = `
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            `;
-            
+            toggle.setAttribute('aria-label', 'Menu');
+            toggle.innerHTML = '<span class="bar"></span><span class="bar"></span><span class="bar"></span>';
             toggle.onclick = (e) => {
                 e.stopPropagation();
                 toggle.classList.toggle('active');
-                const links = document.querySelector('.nav-links');
-                if (links) links.classList.toggle('active');
+                drawer.classList.toggle('open');
+                document.body.style.overflow = drawer.classList.contains('open') ? 'hidden' : '';
             };
-            
             navbar.appendChild(toggle);
-            
-            // Close menu when clicking anywhere else
-            document.addEventListener('click', (e) => {
-                const links = document.querySelector('.nav-links');
-                if (links && links.classList.contains('active') && !navbar.contains(e.target)) {
-                    links.classList.remove('active');
-                    toggle.classList.remove('active');
-                }
-            });
         }
+
+        document.getElementById('drawerClose').onclick = () => {
+            const toggle = document.querySelector('.nav-toggle');
+            if (toggle) toggle.classList.remove('active');
+            drawer.classList.remove('open');
+            document.body.style.overflow = '';
+        };
+
+        // Close on link click
+        drawer.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                drawer.classList.remove('open');
+                document.body.style.overflow = '';
+                const toggle = document.querySelector('.nav-toggle');
+                if (toggle) toggle.classList.remove('active');
+            });
+        });
     }
 
     static updateHeroButtons() {
@@ -457,51 +490,42 @@ class SessionManager {
     }
 }
 
-// Global Theme Functions to be used everywhere
-function toggleTheme() {
-    const body = document.body;
-    const isDark = body.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeToggleIcon(isDark);
-}
-
-function applySavedTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    const isDark = savedTheme === 'dark';
-    
-    if (isDark) {
-        document.body.classList.add('dark');
-    } else {
-        document.body.classList.remove('dark');
-    }
-    updateThemeToggleIcon(isDark);
-}
-
-function updateThemeToggleIcon(isDark) {
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.innerHTML = isDark ? '☀️' : '🌙';
-    }
-}
+// Theme is always dark — no toggle needed
+function applySavedTheme() { /* always dark via CSS defaults */ }
+function toggleTheme() { /* disabled */ }
+function updateThemeToggleIcon() { /* disabled */ }
 
 // Navigation & Effects
 document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize Supabase Session
     await SessionManager.initialize();
     await SessionManager.updateNavbar();
     if (SessionManager.isLoggedIn()) {
         SessionManager.initNotifications();
     }
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-        const navbar = document.querySelector('.navbar');
-        if (navbar) {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
+    // Dynamic Island contracts on scroll
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 60) {
+                navbar.classList.add('island-contracted');
             } else {
-                navbar.classList.remove('scrolled');
+                navbar.classList.remove('island-contracted');
             }
-        }
-    });
+        }, { passive: true });
+    }
+
+    // Animate elements on scroll into view
+    const animEls = document.querySelectorAll('[data-animate]');
+    if (animEls.length) {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.style.animation = e.target.dataset.animate;
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        animEls.forEach(el => { el.style.opacity = '0'; io.observe(el); });
+    }
 });

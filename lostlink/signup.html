@@ -8,6 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<style>
+.orb { position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat 8s ease-in-out infinite; }
+.orb1 { width:400px;height:400px;top:-100px;left:-100px;background:rgba(124,110,245,0.15); }
+.orb2 { width:300px;height:300px;bottom:-50px;right:-80px;background:rgba(34,211,238,0.09);animation-delay:-4s; }
+@keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-30px) scale(1.05);} }
+</style>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
 
     <!-- NAVBAR -->
     <header class="navbar">
