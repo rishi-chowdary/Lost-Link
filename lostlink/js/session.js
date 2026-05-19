@@ -127,8 +127,20 @@ class SessionManager {
                 <a href="index.html" ${activeLink('index.html')}>Home</a>
                 <a href="dashboard.html" ${activeLink('dashboard.html')}>Dashboard</a>
                 <a href="community.html" ${activeLink('community.html')}>Community</a>
-                <a href="postlost.html" ${activeLink('postlost.html')}>Report</a>
                 <a href="messages.html" ${activeLink('messages.html')}>Inbox</a>
+                <div class="nav-dropdown-wrap">
+                    <button class="nav-dropdown-btn ${currentPage === 'postlost.html' ? 'active-link' : ''}">
+                        Report <span class="nav-dropdown-arrow">▾</span>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="postlost.html" class="nav-dropdown-item">
+                            <span>📦</span> Report Lost
+                        </a>
+                        <a href="postlost.html?type=found" class="nav-dropdown-item">
+                            <span>🔍</span> Report Found
+                        </a>
+                    </div>
+                </div>
                 <span class="island-sep"></span>
                 <a href="profile.html" ${activeLink('profile.html')}>Profile</a>
                 ${isAdmin ? '<a href="admin.html" style="color:var(--accent-bright);font-weight:700;">Admin</a>' : ''}
