@@ -86,8 +86,9 @@ class SessionManager {
     }
 
     static async updateNavbar() {
+        const navbar = document.querySelector('.navbar');
         const navLinks = document.querySelector('.nav-links');
-        if (!navLinks) return;
+        if (!navLinks || !navbar) return;
 
         const isLoggedIn = this.isLoggedIn();
         let isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -129,6 +130,19 @@ class SessionManager {
                 <a href="postlost.html" ${activeLink('postlost.html')}>Report</a>
                 <a href="messages.html" ${activeLink('messages.html')}>Inbox</a>
                 <span class="island-sep"></span>
+                <a href="profile.html" ${activeLink('profile.html')}>Profile</a>
+                ${isAdmin ? '<a href="admin.html" style="color:var(--accent-bright);font-weight:700;">Admin</a>' : ''}
+                <a href="#" onclick="SessionManager.logout(event)" style="color:rgba(239,68,68,0.8);">Logout</a>
+            `;
+
+            // Inject notification bell as a separate island element (not inside nav-links)
+            let bellEl = navbar.querySelector('.island-bell');
+            if (!bellEl) {
+                bellEl = document.createElement('div');
+                bellEl.className = 'island-bell';
+                navbar.insertBefore(bellEl, navLinks.nextSibling);
+            }
+            bellEl.innerHTML = `
                 <div class="notification-bell-container" onclick="SessionManager.toggleNotificationDropdown(event)">
                     <span class="bell-icon">🔔</span>
                     <span id="notificationBadge" class="notification-badge" style="display:none;">0</span>
@@ -138,16 +152,13 @@ class SessionManager {
                             <span class="mark-read-btn" onclick="SessionManager.markAllNotificationsAsRead(event)">Mark all read</span>
                         </div>
                         <div class="notification-list" id="notificationList">
-                            <div style="padding:20px;text-align:center;opacity:0.5;font-size:0.82rem;">Loading...</div>
+                            <div style="padding:20px;text-align:center;opacity:0.5;font-size:0.82rem;">No new notifications</div>
                         </div>
                         <div class="notification-dropdown-footer">
                             <a href="messages.html">View All Messages</a>
                         </div>
                     </div>
                 </div>
-                <a href="profile.html" ${activeLink('profile.html')}>Profile</a>
-                ${isAdmin ? '<a href="admin.html" style="color:var(--accent-bright);font-weight:700;">Admin</a>' : ''}
-                <a href="#" onclick="SessionManager.logout(event)" style="color:rgba(239,68,68,0.8);">Logout</a>
             `;
         } else {
             localStorage.setItem('isAdmin', 'false');
@@ -156,6 +167,9 @@ class SessionManager {
                 <a href="login.html" ${activeLink('login.html')}>Login</a>
                 <a href="signup.html" ${activeLink('signup.html')}>Sign Up</a>
             `;
+            // Remove bell if logged out
+            const oldBell = navbar.querySelector('.island-bell');
+            if (oldBell) oldBell.remove();
         }
 
         this.updateHeroButtons();

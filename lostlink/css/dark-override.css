@@ -1,0 +1,144 @@
+/*
+ * dark-override.css
+ * Injected into legacy pages (dashboard, community, profile, postlost, complaint)
+ * to enforce the new obsidian dark design system without rewriting each page's full CSS.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+/* Force dark background on all legacy pages */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', 'Poppins', sans-serif !important;
+    background: #080b12 !important;
+    background-attachment: fixed !important;
+    color: #f0f4ff !important;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Kill the old gradient pseudo-element */
+body::before {
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,110,245,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(34,211,238,0.08) 0%, transparent 60%) !important;
+    animation: none !important;
+}
+
+body::after { display: none; }
+
+/* Override any old gradient backgrounds */
+.glass, [class*="glass"],
+.card, [class*="card"],
+.form-card, .stat-card,
+.item-card, .dashboard-card,
+.post-card, .community-card {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* Override old navbars — the new island is from style.css */
+.navbar.old-navbar,
+nav.old-navbar {
+    display: none;
+}
+
+/* Headings gradient */
+h1, h2, h3 { font-family: 'Outfit', sans-serif !important; }
+
+h1[class*="title"], h2[class*="title"],
+.page-title, .section-title {
+    background: linear-gradient(135deg, #fff 30%, #a89af8) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Buttons */
+button, .btn, [class*="btn"] {
+    font-family: 'Outfit', sans-serif !important;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+
+/* Inputs */
+input, select, textarea {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: #f0f4ff !important;
+    border-radius: 10px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #7c6ef5 !important;
+    background: rgba(124,110,245,0.06) !important;
+    box-shadow: 0 0 0 3px rgba(124,110,245,0.12) !important;
+    outline: none !important;
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgba(200,210,240,0.35) !important;
+}
+
+label {
+    color: rgba(200,210,240,0.6) !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+/* Override any old colourful gradients on cards */
+[style*="background: linear-gradient(135deg, #667"],
+[style*="background: linear-gradient(135deg, #764"],
+[style*="background: linear-gradient(135deg, #f09"] {
+    background: rgba(255,255,255,0.04) !important;
+}
+
+/* Status badges */
+.status-badge, [class*="status-"] {
+    border-radius: 50px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    padding: 3px 10px !important;
+}
+
+/* Tab buttons */
+.tab-btn, [class*="tab-"] {
+    border-radius: 50px !important;
+    transition: all 0.25s ease !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,110,245,0.4); }
+
+/* Page wrapper spacing for new island nav */
+.page-wrapper, .dashboard-wrapper, .community-wrapper,
+.profile-container, .complaint-container, .report-container,
+main, .main-container {
+    padding-top: 90px !important;
+}
+
+/* Glow accents on hover cards */
+.item-card:hover, .post-card:hover,
+.dashboard-card:hover, .feature-card:hover {
+    border-color: rgba(124,110,245,0.3) !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4) !important;
+    transform: translateY(-4px) !important;
+}
+
+/* Accent colour overrides */
+:root {
+    --accent: #a89af8 !important;
+    --accent-hover: #7c6ef5 !important;
+    --text-secondary: rgba(200,210,240,0.6) !important;
+    --glass-bg: rgba(255,255,255,0.04) !important;
+    --glass-border: rgba(255,255,255,0.08) !important;
+    --primary-gradient: linear-gradient(135deg, #7c6ef5, #22d3ee) !important;
+}
