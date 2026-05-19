@@ -381,7 +381,7 @@ input:focus {
 .notification-badge {
     position: absolute;
     top: -5px;
-    right: -5px;
+    left: -5px;
     background: #ff4757;
     color: white;
     font-size: 0.7rem;

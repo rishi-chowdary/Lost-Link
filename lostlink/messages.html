@@ -427,18 +427,21 @@
                     event: 'INSERT', 
                     schema: 'public', 
                     table: 'messages',
-                    filter: `sender_id=eq.${recipientId},receiver_id=eq.${currentUser.id}`
+                    filter: `receiver_id=eq.${currentUser.id}`
                 }, async (payload) => {
-                    appendMessage(payload.new, 'received');
-                    
-                    // Mark as read in DB immediately
-                    try {
-                        await supabase
-                            .from('messages')
-                            .update({ is_read: true })
-                            .eq('id', payload.new.id);
-                    } catch (e) {
-                        console.error('Error marking message as read:', e);
+                    const msg = payload.new;
+                    if (msg.sender_id === recipientId) {
+                        appendMessage(msg, 'received');
+                        
+                        // Mark as read in DB immediately
+                        try {
+                            await supabase
+                                .from('messages')
+                                .update({ is_read: true })
+                                .eq('id', msg.id);
+                        } catch (e) {
+                            console.error('Error marking message as read:', e);
+                        }
                     }
                 })
                 .subscribe();
