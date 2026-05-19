@@ -225,6 +225,16 @@ h1, h2, h3, h4, h5 { font-family: 'Outfit', sans-serif !important; }
     display: flex !important;
 }
 
+.nav-dropdown-menu::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -15px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 15px !important;
+    background: transparent !important;
+}
+
 .nav-dropdown-item {
     display: flex !important;
     align-items: center !important;

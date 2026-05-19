@@ -248,6 +248,17 @@ body::after {
     transform: translateX(-50%) rotate(45deg);
 }
 
+/* Invisible hover bridge to prevent menu from closing during mouse transit */
+.nav-dropdown-menu::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: transparent;
+}
+
 .nav-dropdown-item {
     display: flex;
     align-items: center;
