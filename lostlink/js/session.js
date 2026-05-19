@@ -122,6 +122,7 @@ class SessionManager {
                 <a href="community.html">Community</a>
                 <a href="postlost.html">Report Lost</a>
                 <a href="postlost.html?type=found">Report Found</a>
+                <a href="messages.html">Inbox</a>
                 <a href="profile.html">Profile</a>
                 ${isAdmin 
                     ? '<a href="admin.html" style="color: var(--accent); font-weight: 700;">Admin</a>' 
