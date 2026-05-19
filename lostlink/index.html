@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LostLink - Find What's Lost</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Unique styles for Landing Page that aren't in shared style.css */
+        .hero {
+            text-align: center;
+            padding: 180px 20px 120px;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            padding: 1.5rem 2.5rem;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: block;
+        }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-landing {
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary-l {
+            background: linear-gradient(45deg, var(--accent), #ff6b6b);
+            color: #1e1b4b;
+            box-shadow: 0 10px 30px rgba(255, 211, 105, 0.3);
+        }
+
+        .btn-secondary-l {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .features-section {
+            padding: 100px 5%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            padding: 40px;
+            background: var(--glass-bg);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-8px);
+        }
+
+        .feature-icon { font-size: 3rem; margin-bottom: 20px; display: block; }
+        .feature-card h3 { color: var(--accent); margin-bottom: 15px; font-size: 1.5rem; }
+        .feature-card p { color: var(--text-secondary); line-height: 1.6; }
+
+        footer {
+            padding: 60px 5%;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3.5rem; }
+            .action-btns { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar" id="navbar">
+        <div class="logo">LostLink</div>
+        <nav class="nav-links">
+            <!-- Dynamically populated by session.js -->
+        </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Find What's <span style="color: var(--accent);">Lost</span></h1>
+            <p class="subtitle">Join thousands of students in making college life a little less lost. Report items, help others, and get rewarded.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="number" id="stat-recovered">...</span>
+                    <span class="label">Recovered</span>
+                </div>
+                <div class="stat-card">
+                    <span class="number" id="stat-users">...</span>
+                    <span class="label">Users</span>
+                </div>
+                <div class="stat-card">
+                    <span class="number">24/7</span>
+                    <span class="label">Live</span>
+                </div>
+            </div>
+
+            <div class="action-btns" id="hero-buttons">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">Why LostLink?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🔍</span>
+                <h3>AI-Powered Search</h3>
+                <p>Intelligent matching systems that connect lost items with their owners instantly based on descriptions.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📱</span>
+                <h3>Real-time Alerts</h3>
+                <p>Get notified the moment someone reports an item that matches yours. Never miss a lead.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📍</span>
+                <h3>Location Tracking</h3>
+                <p>Precision location marking for where items were last seen or found on campus maps.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© 2026 LostLink • Reconnecting People with Belongings</p>
+        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 30px;">
+            <a href="#" style="color: inherit; text-decoration: none;">Privacy</a>
+            <a href="#" style="color: inherit; text-decoration: none;">Terms</a>
+            <a href="#" style="color: inherit; text-decoration: none;">Support</a>
+        </div>
+    </footer>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/session.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fetch real stats
+            try {
+                const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+                const { count: foundCount } = await supabase.from('found_items').select('*', { count: 'exact', head: true });
+                
+                document.getElementById('stat-users').textContent = userCount || 0;
+                document.getElementById('stat-recovered').textContent = (foundCount || 0) + '+';
+            } catch (e) {
+                console.error("Error loading index stats", e);
+                document.getElementById('stat-users').textContent = '100+';
+                document.getElementById('stat-recovered').textContent = '50+';
+            }
+        });
+    </script>
+</body>
+</html>

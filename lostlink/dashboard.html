@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>LostLink - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* DARK MODE */
+        .dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e8e8e8;
+        }
+
+        /* ANIMATED BACKGROUND */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="60" cy="10" r="1" fill="rgba(255,255,255,0.06)"/><circle cx="10" cy="60" r="1.2" fill="rgba(255,255,255,0.07)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* GLASSMORPHISM EFFECTS */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+
+        /* NAVIGATION */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: #ffd369;
+            transform: translateY(-2px);
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            margin-top: 100px;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* WELCOME SECTION */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ffffff, #ffd369, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: textGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.3); }
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* STATS CARDS */
+        .stats-section {
+            margin-bottom: 60px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            animation: cardFloat 6s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0s; }
+        .stat-card:nth-child(2) { animation-delay: 1s; }
+        .stat-card:nth-child(3) { animation-delay: 2s; }
+        .stat-card:nth-child(4) { animation-delay: 3s; }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: iconBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .stat-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .stat-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            border-radius: 3px;
+            animation: progressFill 2s ease-out;
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: var(--progress); }
+        }
+
+        /* CHART SECTION */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 60px;
+            animation: slideInLeft 1s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .chart-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #ffffff, #ffd369);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: end;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .chart-bar {
+            width: 60px;
+            background: linear-gradient(180deg, #ffd369, #ff6b6b);
+            border-radius: 30px 30px 0 0;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: barGrow 1.5s ease-out;
+        }
+
+        .chart-bar:nth-child(1) { animation-delay: 0.1s; }
+        .chart-bar:nth-child(2) { animation-delay: 0.2s; }
+        .chart-bar:nth-child(3) { animation-delay: 0.3s; }
+        .chart-bar:nth-child(4) { animation-delay: 0.4s; }
+        .chart-bar:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes barGrow {
+            from { height: 0; }
+            to { height: var(--height); }
+        }
+
+        .chart-bar:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chart-bar:hover::after {
+            opacity: 1;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .chart-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        /* QUICK ACTIONS */
+        .actions-section {
+            margin-bottom: 60px;
+        }
+
+        .actions-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #ffffff, #ffd369);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            animation: cardSlideUp 1s ease-out;
+        }
+
+        .action-card:nth-child(1) { animation-delay: 0.1s; }
+        .action-card:nth-child(2) { animation-delay: 0.2s; }
+        .action-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes cardSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 211, 105, 0.1), rgba(255, 107, 107, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .action-card:hover::before {
+            opacity: 1;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .action-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ffd369;
+            font-weight: 600;
+        }
+
+        .action-card p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+
+
+        /* SEARCH SECTION */
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 60px;
+            text-align: center;
+            animation: fadeInScale 1s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .search-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffffff, #ffd369);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 70px 20px 30px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:focus {
+            border-color: #ffd369;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(255, 211, 105, 0.3);
+            transform: scale(1.02);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 40px;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(255, 211, 105, 0.4);
+        }
+
+        /* ITEMS GRID */
+        .items-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #ffffff, #ffd369);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            animation: cardFadeIn 0.8s ease-out;
+            cursor: pointer;
+        }
+
+        .item-card:nth-child(1) { animation-delay: 0.1s; }
+        .item-card:nth-child(2) { animation-delay: 0.2s; }
+        .item-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .item-card:hover {
+            transform: translateY(-15px) rotate(2deg);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .item-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 8s linear infinite;
+        }
+
+        .item-content {
+            padding: 25px;
+        }
+
+        .item-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffd369;
+        }
+
+        .item-description {
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ACHIEVEMENTS SECTION */
+        .achievements-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 60px;
+            text-align: center;
+            animation: slideInRight 1s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .achievements-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffffff, #ffd369);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .achievement-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .achievement-badge:hover {
+            transform: scale(1.1) rotate(5deg);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement-badge.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .achievement-badge.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1rem;
+        }
+
+        .achievement-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 20px;
+            }
+
+            .main {
+                padding: 100px 20px 20px;
+            }
+
+            .welcome-section h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 150px;
+            }
+
+            .chart-bar {
+                width: 40px;
+            }
+        }
+    </style>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="logo">LostLink</div>
+        <div class="nav-links">
+            <!-- Navigation will be updated by session.js -->
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- WELCOME SECTION -->
+        <div class="welcome-section">
+            <h1>Welcome back!</h1>
+            <p>Manage your lost and found items from your personal dashboard</p>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">📦</span>
+                    <span class="stat-number">0</span>
+                    <div class="stat-label">Items Reported</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="--progress: 0%;"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🔍</span>
+                    <span class="stat-number">0</span>
+                    <div class="stat-label">Items Found</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="--progress: 0%;"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">❤️</span>
+                    <span class="stat-number">0</span>
+                    <div class="stat-label">Community Helps</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="--progress: 0%;"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-number">5.0</span>
+                    <div class="stat-label">Rating</div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="--progress: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHART SECTION -->
+            <div class="chart-section">
+                <h2>Activity Overview</h2>
+                <div class="chart-container">
+                    <div class="chart-bar" style="--height: 0px;" data-value="0"></div>
+                    <div class="chart-bar" style="--height: 0px;" data-value="0"></div>
+                    <div class="chart-bar" style="--height: 0px;" data-value="0"></div>
+                    <div class="chart-bar" style="--height: 0px;" data-value="0"></div>
+                    <div class="chart-bar" style="--height: 0px;" data-value="0"></div>
+                </div>
+                <div class="chart-labels">
+                    <div class="chart-label">Mon</div>
+                    <div class="chart-label">Tue</div>
+                    <div class="chart-label">Wed</div>
+                    <div class="chart-label">Thu</div>
+                    <div class="chart-label">Fri</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACHIEVEMENTS SECTION -->
+        <div class="achievements-section">
+            <h2>Your Achievements</h2>
+            <div class="achievements-grid">
+                <div class="achievement-badge">🏆</div>
+                <div class="achievement-badge">🎯</div>
+                <div class="achievement-badge">⭐</div>
+                <div class="achievement-badge locked">👑</div>
+                <div class="achievement-badge locked">💎</div>
+                <div class="achievement-badge locked">🚀</div>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="actions-section">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+                <div class="action-card" onclick="window.location.href='postlost.html'">
+                    <span class="action-icon">📝</span>
+                    <h3>Report Lost Item</h3>
+                    <p>Report an item you've lost with detailed information to help others find it.</p>
+                    <button class="btn btn-primary">Report Lost Item</button>
+                </div>
+                <div class="action-card" onclick="window.location.href='postlost.html?type=found'">
+                    <span class="action-icon">🔍</span>
+                    <h3>Report Found Item</h3>
+                    <p>Help return a found item to its owner by reporting it with location and details.</p>
+                    <button class="btn btn-secondary">Report Found Item</button>
+                </div>
+                <div class="action-card" onclick="window.location.href='community.html'">
+                    <span class="action-icon">🌐</span>
+                    <h3>Browse Community</h3>
+                    <p>Explore all lost and found items posted by the community in a social feed.</p>
+                    <button class="btn btn-secondary">View Community</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH SECTION -->
+        <div class="search-section">
+            <h2>Search Your Items</h2>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search your reported items..." onkeyup="searchItems(this.value)">
+                <button class="search-btn">🔍 Search</button>
+            </div>
+        </div>
+
+        <!-- ITEMS GRID -->
+        <div class="items-section">
+            <h2>Your Recent Items</h2>
+            <div class="items-grid" id="itemsGrid">
+                <!-- Items will be dynamically loaded here -->
+                <div class="item-card">
+                    <div class="item-image">📱</div>
+                    <div class="item-content">
+                        <div class="item-title">iPhone 12 Pro</div>
+                        <div class="item-description">Black iPhone 12 Pro with blue case. Lost in the library yesterday.</div>
+                        <div class="item-meta">
+                            <span>Lost • 2 days ago</span>
+                            <span>📍 Library</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div class="item-image">🎒</div>
+                    <div class="item-content">
+                        <div class="item-title">Blue Backpack</div>
+                        <div class="item-description">Nike backpack with books and laptop inside. Very important!</div>
+                        <div class="item-meta">
+                            <span>Lost • 1 week ago</span>
+                            <span>📍 Cafeteria</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-card">
+                    <div class="item-image">⌚</div>
+                    <div class="item-content">
+                        <div class="item-title">Apple Watch</div>
+                        <div class="item-description">Found this smartwatch in the parking lot. Please claim it!</div>
+                        <div class="item-meta">
+                            <span>Found • 3 days ago</span>
+                            <span>📍 Parking Lot</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/session.js"></script>
+    <script>
+        /* CHECK LOGIN ON PAGE LOAD */
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Need to wait for SessionManager to initialize in session.js
+            // But session.js uses DOMContentLoaded too. To be safe, we check if initialize is needed.
+            if (typeof SessionManager.initialize === 'function') {
+                await SessionManager.initialize();
+            }
+
+            if (!SessionManager.requireLogin()) {
+                return; // Will redirect to login if not logged in
+            }
+
+            // Add interactive effects
+            addCardInteractions();
+
+            // Load dashboard data
+            loadDashboardData();
+        });
+
+        /* LOAD DASHBOARD DATA */
+        async function loadDashboardData() {
+            const userId = SessionManager.getUserId();
+            if (!userId) return;
+
+            try {
+                // Fetch user profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', userId)
+                    .single();
+
+                if (profile?.full_name) {
+                    document.querySelector('.welcome-section h1').textContent = `Welcome back, ${profile.full_name}!`;
+                }
+
+                // Fetch lost items for this user
+                const { data: lostItems, error: lostError } = await supabase
+                    .from('lost_items')
+                    .select('*')
+                    .eq('user_id', userId);
+
+                // Fetch found items for this user
+                const { data: foundItems, error: foundError } = await supabase
+                    .from('found_items')
+                    .select('*')
+                    .eq('user_id', userId);
+
+                if (lostError || foundError) throw (lostError || foundError);
+
+                // Calculate stats manually
+                const stats = {
+                    lostItemsCount: lostItems?.length || 0,
+                    foundItemsCount: foundItems?.length || 0,
+                    resolvedLostCount: 0, // In a real app, you'd have a 'status' column
+                    resolvedFoundCount: 0
+                };
+
+                updateStats(stats);
+                updateItems(lostItems, foundItems);
+                updateChart(stats);
+
+            } catch (error) {
+                console.error('Error loading dashboard data from Supabase:', error);
+                // Fallback to sample data if database is empty/missing
+                updateStats({ lostItemsCount: 0, foundItemsCount: 0, resolvedLostCount: 0, resolvedFoundCount: 0 });
+            }
+        }
+
+        /* UPDATE STATS */
+        function updateStats(stats) {
+            const totalItems = (stats.lostItemsCount || 0) + (stats.foundItemsCount || 0);
+            const resolvedItems = (stats.resolvedLostCount || 0) + (stats.resolvedFoundCount || 0);
+
+            // Update stat numbers
+            const statCards = document.querySelectorAll('.stat-card');
+            if (statCards.length >= 3) {
+                statCards[0].querySelector('.stat-number').textContent = totalItems;
+                statCards[1].querySelector('.stat-number').textContent = stats.foundItemsCount || 0;
+                statCards[2].querySelector('.stat-number').textContent = resolvedItems;
+                statCards[3].querySelector('.stat-number').textContent = '4.9'; // Premium rating
+            }
+
+            // Update progress bars
+            const progressBars = document.querySelectorAll('.stat-progress-bar');
+            if (progressBars.length >= 3) {
+                const progress1 = totalItems > 0 ? (resolvedItems / totalItems) * 100 : 0;
+                const progress2 = totalItems > 0 ? (stats.foundItemsCount / totalItems) * 100 : 0;
+                const progress3 = 90; 
+                const progress4 = 98; 
+
+                progressBars[0].style.setProperty('--progress', progress1 + '%');
+                progressBars[1].style.setProperty('--progress', progress2 + '%');
+                progressBars[2].style.setProperty('--progress', progress3 + '%');
+                progressBars[3].style.setProperty('--progress', progress4 + '%');
+            }
+        }
+
+        /* UPDATE ITEMS */
+        function updateItems(lostItems, foundItems) {
+            const itemsGrid = document.getElementById('itemsGrid');
+            if (!itemsGrid) return;
+            itemsGrid.innerHTML = '';
+
+            // Combine and sort items by date (most recent first)
+            const allItems = [];
+
+            if (lostItems) {
+                lostItems.forEach(item => {
+                    allItems.push({
+                        ...item,
+                        type: 'lost',
+                        title: item.name, // Supabase schema uses 'name'
+                        date: new Date(item.date_lost || item.created_at)
+                    });
+                });
+            }
+
+            if (foundItems) {
+                foundItems.forEach(item => {
+                    allItems.push({
+                        ...item,
+                        type: 'found',
+                        title: item.name,
+                        date: new Date(item.date_found || item.created_at)
+                    });
+                });
+            }
+
+            allItems.sort((a, b) => b.date - a.date);
+
+            // Display up to 6 recent items
+            allItems.slice(0, 6).forEach((item, index) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.style.animationDelay = (index * 0.1) + 's';
+
+                const status = item.type === 'lost' ? 'Lost' : 'Found';
+                const timeAgo = getTimeAgo(item.date);
+
+                const mediaContent = item.image_url 
+                    ? `<img src="${item.image_url}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`
+                    : icon;
+
+                itemCard.innerHTML = `
+                    <div class="item-image">${mediaContent}</div>
+                    <div class="item-content">
+                        <div class="item-title">${item.title}</div>
+                        <div class="item-description">${item.description}</div>
+                        <div class="item-meta">
+                            <span>${status} • ${timeAgo}</span>
+                            <span>📍 ${item.location}</span>
+                        </div>
+                    </div>
+                `;
+
+                itemsGrid.appendChild(itemCard);
+            });
+
+            if (allItems.length === 0) {
+                itemsGrid.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7);">No items reported yet. Start by reporting a lost or found item!</p>';
+            }
+        }
+
+        /* UPDATE CHART */
+        function updateChart(stats) {
+            const bars = document.querySelectorAll('.chart-bar');
+            if (!bars.length) return;
+
+            const lostCount = stats.lostItemsCount || 0;
+            const foundCount = stats.foundItemsCount || 0;
+            const resolvedLost = stats.resolvedLostCount || 0;
+            const resolvedFound = stats.resolvedFoundCount || 0;
+
+            const values = [lostCount, foundCount, resolvedLost, resolvedFound, lostCount + foundCount];
+            const maxValue = Math.max(...values, 1);
+
+            bars.forEach((bar, index) => {
+                const height = (values[index] / maxValue) * 160;
+                bar.style.setProperty('--height', height + 'px');
+                bar.setAttribute('data-value', values[index]);
+            });
+        }
+
+        /* HELPER FUNCTIONS */
+        function getItemIcon(category) {
+            const icons = {
+                'Electronics': '📱',
+                'Clothing': '👕',
+                'Books': '📚',
+                'Keys': '🔑',
+                'Wallet': '👛',
+                'Jewelry': '💍',
+                'Bag': '🎒',
+                'Other': '📦'
+            };
+            return icons[category] || '📦';
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return '1 day ago';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+            return `${Math.floor(diffDays / 30)} months ago`;
+        }
+
+        /* CREATE PARTICLE EFFECTS */
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Random properties
+                const size = Math.random() * 6 + 2;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 20;
+
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = left + '%';
+                particle.style.animationDelay = delay + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.1;
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        /* ADD CARD INTERACTIONS */
+        function addCardInteractions() {
+            const cards = document.querySelectorAll('.item-card, .action-card, .stat-card');
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform += ' rotate(1deg)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = this.style.transform.replace(' rotate(1deg)', '');
+                });
+            });
+        }
+
+        /* SEARCH FUNCTION */
+        function searchItems(text) {
+            let cards = document.querySelectorAll(".item-card");
+            cards.forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(text.toLowerCase()) ? "block" : "none";
+            });
+        }
+
+        /* ADD SOME FUN INTERACTIONS */
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('achievement-badge') && !e.target.classList.contains('locked')) {
+                // Create a fun click effect
+                const ripple = document.createElement('div');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                ripple.style.left = (e.offsetX - 10) + 'px';
+                ripple.style.top = (e.offsetY - 10) + 'px';
+                ripple.style.width = '20px';
+                ripple.style.height = '20px';
+                ripple.style.pointerEvents = 'none';
+
+                e.target.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+</body>
+</html>

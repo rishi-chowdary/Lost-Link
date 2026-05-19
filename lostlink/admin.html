@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | LostLink</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 120px auto 60px;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent), #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .complaints-table-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            text-align: left;
+            padding: 20px;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(255, 159, 67, 0.2);
+            color: #ff9f43;
+            border: 1px solid rgba(255, 159, 67, 0.3);
+        }
+
+        .status-resolved {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .date-info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .resolve-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .resolve-btn:hover {
+            background: var(--accent);
+            color: #1e1b4b;
+        }
+
+        .empty-state {
+            padding: 60px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .whitelist-section {
+            margin-top: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .whitelist-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .whitelist-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .whitelist-form input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+        }
+
+        .whitelist-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .whitelist-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .whitelist-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .remove-btn {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .remove-btn:hover {
+            background: #ff4757;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo">LostLink</div>
+        <nav class="nav-links">
+            <!-- Populated by session.js -->
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <div id="stats" class="user-info"></div>
+        </div>
+
+        <div class="complaints-table-container">
+            <div style="padding: 20px; border-bottom: 1px solid var(--glass-border);">
+                <h2 style="font-size: 1.25rem; font-family: 'Outfit';">User Complaints</h2>
+            </div>
+            <table id="complaintsTable">
+                <thead>
+                    <tr>
+                        <th width="20%">User</th>
+                        <th width="20%">Subject</th>
+                        <th width="40%">Description</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="complaintsBody">
+                    <!-- Loaded dynamically -->
+                </tbody>
+            </table>
+            <div id="loading" class="empty-state">Loading complaints...</div>
+            <div id="noComplaints" class="empty-state" style="display: none;">
+                <i>📂</i> No complaints found.
+            </div>
+        </div>
+
+        <!-- WHITELIST MANAGER -->
+        <div class="whitelist-section">
+            <div class="whitelist-header">
+                <h2 style="font-size: 1.25rem; font-family: 'Outfit';">Whitelist Manager</h2>
+            </div>
+            
+            <div class="whitelist-form">
+                <input type="email" id="newAdminEmail" placeholder="Enter email to whitelist...">
+                <button class="resolve-btn" onclick="addToWhitelist()">Add Admin</button>
+            </div>
+
+            <div class="whitelist-list" id="whitelistContent">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/session.js"></script>
+    <script>
+        // SECURITY CHECK: Redirect if not an admin
+        async function checkAdminStatus() {
+            await SessionManager.initialize();
+            const userId = SessionManager.getUserId();
+            
+            // EMERGENCY BYPASS FOR YOU
+            if (userId === 'b3bdb953-5a1a-448a-9b22-b3fb891e7c98') {
+                console.log("Super Admin Bypass active.");
+                return;
+            }
+
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('whitelist')
+                .select('user_id')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (error || !data) {
+                console.error("Access Denied Details:", {error, data, userId});
+                alert("Permission Error: Your account is logged in, but the database didn't confirm your Admin status. Redirecting to home.");
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function fetchComplaints() {
+            const tableBody = document.getElementById('complaintsBody');
+            const loadingDiv = document.getElementById('loading');
+            const noComplaintsDiv = document.getElementById('noComplaints');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('complaints')
+                    .select('*, profiles(full_name)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                loadingDiv.style.display = 'none';
+                
+                if (!data || data.length === 0) {
+                    noComplaintsDiv.style.display = 'block';
+                    return;
+                }
+
+                tableBody.innerHTML = '';
+                data.forEach(complaint => {
+                    const tr = document.createElement('tr');
+                    
+                    const date = new Date(complaint.created_at).toLocaleDateString();
+                    const userName = complaint.profiles?.full_name || 'Anonymous User';
+                    const statusClass = complaint.status === 'resolved' ? 'status-resolved' : 'status-pending';
+                    const actionBtn = complaint.status === 'pending' 
+                        ? `<button class="resolve-btn" onclick="resolveComplaint('${complaint.id}')">Resolve</button>`
+                        : 'Resolved';
+
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight: 600;">${userName}</div>
+                            <div class="date-info">${date}</div>
+                        </td>
+                        <td><strong>${complaint.subject}</strong></td>
+                        <td style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary);">${complaint.description}</td>
+                        <td><span class="status-badge ${statusClass}">${complaint.status}</span></td>
+                        <td>${actionBtn}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                document.getElementById('stats').textContent = `Total: ${data.length} complaints`;
+
+            } catch (error) {
+                console.error('Error fetching complaints:', error);
+                loadingDiv.textContent = 'Error loading complaints.';
+            }
+        }
+
+        async function fetchWhitelist() {
+            const listContainer = document.getElementById('whitelistContent');
+            try {
+                // Join with profiles to get email and name
+                const { data, error } = await supabase
+                    .from('whitelist')
+                    .select('user_id, added_at, profiles(full_name, email)')
+                    .order('added_at', { ascending: false });
+
+                if (error) throw error;
+
+                listContainer.innerHTML = '';
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'whitelist-item';
+                    const displayIdentifier = item.profiles?.email || 'Unknown User';
+                    div.innerHTML = `
+                        <span>${displayIdentifier}</span>
+                        <button class="remove-btn" onclick="removeFromWhitelist('${item.user_id}', '${displayIdentifier}')">Remove</button>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error fetching whitelist:', error);
+            }
+        }
+
+        async function addToWhitelist() {
+            const emailInput = document.getElementById('newAdminEmail');
+            const email = emailInput.value.trim().toLowerCase();
+
+            if (!email) return;
+
+            try {
+                // 1. Look up UID by email in profiles
+                const { data: profile, error: pError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .ilike('email', email)
+                    .maybeSingle();
+
+                if (pError) throw pError;
+                if (!profile) {
+                    alert("User not found. They must register for LostLink first.");
+                    return;
+                }
+
+                // 2. Add UID to whitelist
+                const { error } = await supabase
+                    .from('whitelist')
+                    .insert([{ user_id: profile.id }]);
+
+                if (error) throw error;
+                
+                emailInput.value = '';
+                fetchWhitelist();
+                alert(`${email} added to whitelist!`);
+            } catch (error) {
+                alert('Error adding to whitelist: ' + error.message);
+            }
+        }
+
+        async function removeFromWhitelist(userId, email) {
+            if (userId === SessionManager.getUserId()) {
+                alert("You cannot remove yourself from the whitelist!");
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to remove ${email} from the whitelist?`)) return;
+
+            try {
+                const { error } = await supabase
+                    .from('whitelist')
+                    .delete()
+                    .eq('user_id', userId);
+
+                if (error) throw error;
+                fetchWhitelist();
+            } catch (error) {
+                alert('Error removing from whitelist: ' + error.message);
+            }
+        }
+
+        async function resolveComplaint(id) {
+            try {
+                const { error } = await supabase
+                    .from('complaints')
+                    .update({ status: 'resolved' })
+                    .eq('id', id);
+
+                if (error) throw error;
+                fetchComplaints();
+            } catch (error) {
+                alert('Error resolving complaint: ' + error.message);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAdminStatus();
+            fetchComplaints();
+            fetchWhitelist();
+        });
+    </script>
+</body>
+</html>

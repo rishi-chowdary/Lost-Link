@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LostLink Inbox</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            padding: 20px 60px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ffd369, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #ffd369;
+        }
+
+        /* MESSAGING LAYOUT */
+        .messenger-container {
+            flex: 1;
+            display: flex;
+            max-width: 1400px;
+            margin: 20px auto;
+            width: 95%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 350px;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            margin-left: 10px;
+            outline: none;
+            width: 100%;
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-item {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chat-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .chat-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #ffd369;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .chat-info h4 {
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        .chat-info p {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        /* CHAT WINDOW */
+        .chat-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.1);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: var(--primary-gradient);
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.5;
+            display: block;
+            text-align: right;
+        }
+
+        /* INPUT AREA */
+        .chat-input-area {
+            padding: 25px 30px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            border-color: #ffd369;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .send-btn {
+            background: var(--primary-gradient);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* EMPTY STATE */
+        .empty-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+        }
+
+        .empty-chat span {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">LostLink Inbox</div>
+        <div class="nav-links">
+            <a href="dashboard.html" style="color: white; text-decoration: none; margin-right: 20px;">Dashboard</a>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="Profile">
+        </div>
+    </div>
+
+    <div class="messenger-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Messages</h2>
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Search conversations...">
+                </div>
+            </div>
+            <div class="chats-list" id="chatsList">
+                <!-- Chat items will be loaded here -->
+                <div style="padding: 20px; text-align: center; opacity: 0.5;">Loading chats...</div>
+            </div>
+        </div>
+
+        <!-- Main Chat -->
+        <div class="chat-window">
+            <div id="activeChat" style="display: none; height: 100%; flex-direction: column;">
+                <div class="chat-header">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div class="chat-avatar" id="activeAvatar">👤</div>
+                        <div>
+                            <h4 id="activeName">Select a contact</h4>
+                            <p style="font-size: 0.8rem; opacity: 0.6;" id="activeStatus">Online</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="messageFlow">
+                    <!-- Messages will be loaded here -->
+                </div>
+
+                <form class="chat-input-area" onsubmit="sendMessage(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                        <button type="submit" class="send-btn">✈️</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="noChatSelected" class="empty-chat">
+                <span>💬</span>
+                <h3>Your Conversations</h3>
+                <p>Select a chat to start messaging</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script src="js/session.js"></script>
+    <script>
+        let currentUser = null;
+        let activeRecipientId = null;
+        let activeChatSubscription = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await SessionManager.initialize();
+            if (!SessionManager.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = SessionManager.getUser();
+            loadConversations();
+            
+            // Check for URL parameters (e.g. starting a new chat)
+            const params = new URLSearchParams(window.location.search);
+            const startChatWith = params.get('user_id');
+            if (startChatWith) {
+                openChat(startChatWith, params.get('name') || 'User');
+            }
+        });
+
+        async function loadConversations() {
+            const { data: messages, error } = await supabase
+                .from('messages')
+                .select('*')
+                .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+                .order('created_at', { ascending: false });
+
+            if (error) return console.error(error);
+
+            const chatsList = document.getElementById('chatsList');
+            chatsList.innerHTML = '';
+
+            const conversations = {};
+            messages.forEach(msg => {
+                const otherId = msg.sender_id === currentUser.id ? msg.receiver_id : msg.sender_id;
+                if (!conversations[otherId]) {
+                    conversations[otherId] = msg;
+                }
+            });
+
+            const userIds = Object.keys(conversations);
+            if (userIds.length === 0) {
+                chatsList.innerHTML = '<div style="padding: 40px; text-align: center; opacity: 0.5;">No messages yet.</div>';
+                return;
+            }
+
+            // Get profile info for users
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('*')
+                .in('id', userIds);
+
+            userIds.forEach(uid => {
+                const profile = profiles?.find(p => p.id === uid);
+                const lastMsg = conversations[uid];
+                const name = profile?.full_name || 'Community Member';
+                
+                const item = document.createElement('div');
+                item.className = 'chat-item';
+                item.onclick = () => openChat(uid, name);
+                item.innerHTML = `
+                    <div class="chat-avatar">${name.charAt(0)}</div>
+                    <div class="chat-info">
+                        <h4>${name}</h4>
+                        <p>${lastMsg.content}</p>
+                    </div>
+                `;
+                chatsList.appendChild(item);
+            });
+        }
+
+        async function openChat(recipientId, name) {
+            activeRecipientId = recipientId;
+            document.getElementById('noChatSelected').style.display = 'none';
+            document.getElementById('activeChat').style.display = 'flex';
+            document.getElementById('activeName').textContent = name;
+            document.getElementById('activeAvatar').textContent = name.charAt(0);
+            
+            // Check if user is already in sidebar
+            const existingChat = Array.from(document.querySelectorAll('.chat-info h4'))
+                .find(h4 => h4.textContent === name);
+            
+            if (!existingChat) {
+                const chatsList = document.getElementById('chatsList');
+                // Remove the "No messages yet" placeholder if it exists
+                if (chatsList.innerText.includes('No messages yet')) chatsList.innerHTML = '';
+                
+                const item = document.createElement('div');
+                item.className = 'chat-item active';
+                item.innerHTML = `
+                    <div class="chat-avatar">${name.charAt(0)}</div>
+                    <div class="chat-info">
+                        <h4>${name}</h4>
+                        <p>New conversation</p>
+                    </div>
+                `;
+                chatsList.prepend(item);
+            }
+
+            // Highlight active chat
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.querySelector('h4').textContent === name) item.classList.add('active');
+            });
+            
+            // Load messages
+            loadMessages(recipientId);
+
+            // Subscribe to real-time updates for this recipient
+            if (activeChatSubscription) supabase.removeChannel(activeChatSubscription);
+            
+            activeChatSubscription = supabase.channel(`chat_${recipientId}`)
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'messages',
+                    filter: `sender_id=eq.${recipientId},receiver_id=eq.${currentUser.id}`
+                }, payload => {
+                    appendMessage(payload.new, 'received');
+                })
+                .subscribe();
+        }
+
+        async function loadMessages(recipientId) {
+            const { data: messages, error } = await supabase
+                .from('messages')
+                .select('*')
+                .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: true });
+
+            const flow = document.getElementById('messageFlow');
+            flow.innerHTML = '';
+            messages?.forEach(msg => {
+                const type = msg.sender_id === currentUser.id ? 'sent' : 'received';
+                appendMessage(msg, type);
+            });
+            flow.scrollTop = flow.scrollHeight;
+        }
+
+        function appendMessage(msg, type) {
+            const flow = document.getElementById('messageFlow');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerHTML = `
+                ${msg.content}
+                <span class="message-time">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            `;
+            flow.appendChild(div);
+            flow.scrollTop = flow.scrollHeight;
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            if (!content || !activeRecipientId) return;
+
+            const { data, error } = await supabase
+                .from('messages')
+                .insert([{
+                    sender_id: currentUser.id,
+                    receiver_id: activeRecipientId,
+                    content: content
+                }])
+                .select();
+
+            if (!error) {
+                appendMessage(data[0], 'sent');
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>

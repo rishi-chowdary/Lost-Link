@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title id="pageTitle">Report Lost Item</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
+    color: white;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* DARK MODE */
+.dark {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #e8e8e8;
+}
+
+/* ANIMATED BACKGROUND */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="60" cy="10" r="1" fill="rgba(255,255,255,0.06)"/><circle cx="10" cy="60" r="1.2" fill="rgba(255,255,255,0.07)"/></svg>');
+    animation: float 20s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(120deg); }
+    66% { transform: translateY(10px) rotate(240deg); }
+}
+
+/* PARTICLE ANIMATION */
+@keyframes particleFloat {
+    0%, 100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.7; }
+    25% { transform: translateY(-20px) translateX(10px) scale(1.1); opacity: 1; }
+    50% { transform: translateY(-10px) translateX(-15px) scale(0.9); opacity: 0.8; }
+    75% { transform: translateY(-25px) translateX(5px) scale(1.05); opacity: 0.9; }
+}
+
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFloat 8s ease-in-out infinite;
+}
+
+.particle:nth-child(1) { width: 4px; height: 4px; top: 10%; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { width: 6px; height: 6px; top: 20%; right: 10%; animation-delay: 2s; }
+.particle:nth-child(3) { width: 3px; height: 3px; top: 40%; left: 20%; animation-delay: 4s; }
+.particle:nth-child(4) { width: 5px; height: 5px; top: 60%; right: 20%; animation-delay: 1s; }
+.particle:nth-child(5) { width: 4px; height: 4px; top: 80%; left: 30%; animation-delay: 3s; }
+.particle:nth-child(6) { width: 7px; height: 7px; top: 30%; right: 30%; animation-delay: 5s; }
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(30px);
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(45deg, #ffd369, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { filter: brightness(1); }
+    to { filter: brightness(1.2); }
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-links a::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(45deg, #ffd369, #ff6b6b);
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::before {
+    width: 100%;
+}
+
+.nav-links a:hover {
+    color: #ffd369;
+    transform: translateY(-2px);
+}
+
+/* FORM CONTAINER */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 120px 20px 40px;
+    position: relative;
+}
+
+.form-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ffd369, #ff6b6b, #ffd369);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(45deg, #ffffff, #ffd369);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+}
+
+/* FORM ELEMENTS */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+.form-group select option {
+    color: white;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #ffd369;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(255, 211, 105, 0.3);
+    transform: translateY(-2px);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.form-group input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.form-group input[type="file"]::file-selector-button {
+    background: linear-gradient(45deg, #ffd369, #ff6b6b);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]::file-selector-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 211, 105, 0.4);
+}
+
+/* REQUIRED FIELDS */
+.required::after {
+    content: ' *';
+    color: #ff6b6b;
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+    width: 100%;
+    padding: 16px 30px;
+    background: linear-gradient(45deg, #ffd369, #ff6b6b);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.submit-btn:hover::before {
+    left: 100%;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 211, 105, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(-1px);
+}
+
+/* MESSAGE DISPLAY */
+.message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    animation: fadeIn 0.5s ease;
+}
+
+.message.success {
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4CAF50;
+}
+
+.message.error {
+    background: rgba(255, 107, 107, 0.2);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    .container {
+        padding: 100px 15px 20px;
+    }
+
+    .form-card {
+        padding: 30px 20px;
+        margin: 0 10px;
+    }
+
+    .form-header h2 {
+        font-size: 2rem;
+    }
+
+    .nav-links a {
+        font-size: 0.9rem;
+    }
+}
+
+/* LOADING ANIMATION */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #ffd369;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- Animated Particles -->
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+
+<div class="navbar">
+    <div class="logo">LostLink</div>
+    <div class="nav-links">
+        <!-- Navigation will be updated by session.js -->
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-card">
+        <div class="form-header">
+            <h2 id="formTitle">📦 Report Lost Item</h2>
+            <p>Help us reunite you with your lost belongings</p>
+        </div>
+
+        <form id="itemForm" onsubmit="handleLostItem(event)">
+            <div class="form-group">
+                <label for="itemName" class="required">Item Name</label>
+                <input type="text" id="itemName" placeholder="e.g., iPhone 12 Pro, Wallet, Keys" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category" class="required">Category</label>
+                <select id="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Electronics">📱 Electronics</option>
+                    <option value="Jewelry">💍 Jewelry</option>
+                    <option value="Documents">📄 Documents</option>
+                    <option value="Clothing">👕 Clothing</option>
+                    <option value="Accessories">👜 Accessories</option>
+                    <option value="Pets">🐾 Pets</option>
+                    <option value="Vehicles">🚗 Vehicles</option>
+                    <option value="Other">📦 Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="required">Description</label>
+                <textarea id="description" placeholder="Provide detailed description, unique features, brand, model, etc." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="color">Color</label>
+                <input type="text" id="color" placeholder="e.g., Black, Red, Blue">
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size/Dimensions</label>
+                <input type="text" id="size" placeholder="e.g., Medium, 6x4 inches">
+            </div>
+
+            <div class="form-group">
+                <label for="dateLost" class="required">Date Lost</label>
+                <input type="date" id="dateLost" required>
+            </div>
+
+            <div class="form-group">
+                <label for="locationLost" class="required">Location Lost</label>
+                <input type="text" id="locationLost" placeholder="e.g., Central Park, Starbucks on 5th Ave" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cityLost" class="required">City</label>
+                <input type="text" id="cityLost" placeholder="City where item was lost" required>
+            </div>
+
+            <div class="form-group">
+                <label for="stateLost">State/Province</label>
+                <input type="text" id="stateLost" placeholder="State or Province">
+            </div>
+
+            <div class="form-group">
+                <label for="latitude">Latitude (Optional)</label>
+                <input type="number" id="latitude" placeholder="GPS Latitude" step="0.000001">
+            </div>
+
+            <div class="form-group">
+                <label for="longitude">Longitude (Optional)</label>
+                <input type="number" id="longitude" placeholder="GPS Longitude" step="0.000001">
+            </div>
+
+            <div class="form-group">
+                <label for="rewardAmount">Reward Amount (Optional)</label>
+                <input type="number" id="rewardAmount" placeholder="Amount you're willing to offer" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="itemImage">Item Photo (Optional)</label>
+                <input type="file" id="itemImage" accept="image/*">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                🚀 Submit Lost Item Report
+            </button>
+        </form>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+</div>
+
+<script src="js/supabase.js"></script>
+<script src="js/session.js"></script>
+<script>
+
+// Form submission handlers
+async function handleLostItem(event) {
+    event.preventDefault();
+
+    // Check if user is logged in using session manager
+    if (!SessionManager.isLoggedIn()) {
+        alert("Please login first!");
+        window.location.href = "login.html";
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const messageDiv = document.getElementById('message');
+
+    // Show loading state
+    submitBtn.classList.add('loading');
+    submitBtn.textContent = 'Submitting...';
+
+    let userId = SessionManager.getUserId();
+    let itemName = document.getElementById("itemName").value.trim();
+    let category = document.getElementById("category").value.trim();
+    let description = document.getElementById("description").value.trim();
+    let color = document.getElementById("color").value.trim();
+    let size = document.getElementById("size").value.trim();
+    let dateLost = document.getElementById("dateLost").value.trim();
+    let locationLost = document.getElementById("locationLost").value.trim();
+    let cityLost = document.getElementById("cityLost").value.trim();
+    let stateLost = document.getElementById("stateLost").value.trim();
+    let latitude = document.getElementById("latitude").value.trim();
+    let longitude = document.getElementById("longitude").value.trim();
+    let rewardAmount = document.getElementById("rewardAmount").value.trim();
+
+    // Validation
+    if(!itemName || !category || !description || !dateLost || !locationLost || !cityLost) {
+        showMessage("Please fill all required fields", "error");
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = '🚀 Submit Lost Item Report';
+        return;
+    }
+
+    // Send to Supabase
+    let imageUrl = null;
+    const file = document.getElementById("itemImage").files[0];
+    if (file) {
+        imageUrl = await uploadImage(file, 'lost-item');
+    }
+
+    const { data, error } = await supabase
+        .from('lost_items')
+        .insert([{
+            user_id: userId,
+            name: itemName,
+            category: category,
+            description: description,
+            color: color,
+            size: size,
+            date_lost: dateLost,
+            location: locationLost,
+            city: cityLost,
+            state: stateLost,
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            reward: rewardAmount ? parseFloat(rewardAmount) : 0,
+            image_url: imageUrl
+        }]);
+
+    submitBtn.classList.remove('loading');
+    if(!error) {
+        showMessage("Lost item reported successfully! Redirecting to dashboard...", "success");
+        submitBtn.textContent = '✅ Success!';
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 2000);
+    } else {
+        console.error('Supabase Error:', error);
+        showMessage(error.message || "Failed to report lost item", "error");
+        submitBtn.textContent = '🚀 Submit Lost Item Report';
+    }
+}
+
+async function uploadImage(file, prefix) {
+    const fileName = `${prefix}-${Date.now()}-${file.name}`;
+    const { data, error } = await supabase.storage
+        .from('item-images')
+        .upload(fileName, file);
+    
+    if (error) {
+        console.error('Image upload error:', error);
+        return null;
+    }
+    
+    const { data: { publicUrl } } = supabase.storage
+        .from('item-images')
+        .getPublicUrl(fileName);
+        
+    return publicUrl;
+}
+
+async function handleFoundItem(event) {
+    event.preventDefault();
+
+    // Check if user is logged in using session manager
+    if (!SessionManager.isLoggedIn()) {
+        alert("Please login first!");
+        window.location.href = "login.html";
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const messageDiv = document.getElementById('message');
+
+    // Show loading state
+    submitBtn.classList.add('loading');
+    submitBtn.textContent = 'Submitting...';
+
+    let userId = SessionManager.getUserId();
+    let itemName = document.getElementById("itemName").value.trim();
+    let category = document.getElementById("category").value.trim();
+    let description = document.getElementById("description").value.trim();
+    let color = document.getElementById("color").value.trim();
+    let size = document.getElementById("size").value.trim();
+    let dateFound = document.getElementById("dateFound").value.trim();
+    let locationFound = document.getElementById("locationFound").value.trim();
+    let cityFound = document.getElementById("cityFound").value.trim();
+    let stateFound = document.getElementById("stateLost").value.trim();
+    let latitude = document.getElementById("latitude").value.trim();
+    let longitude = document.getElementById("longitude").value.trim();
+    let itemCondition = "Good"; // Default condition
+
+    // Validation
+    if(!itemName || !category || !description || !dateFound || !locationFound || !cityFound) {
+        showMessage("Please fill all required fields", "error");
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = '🚀 Submit Found Item Report';
+        return;
+    }
+
+    // Send to Supabase
+    let imageUrl = null;
+    const file = document.getElementById("itemImage").files[0];
+    if (file) {
+        imageUrl = await uploadImage(file, 'found-item');
+    }
+
+    const { data, error } = await supabase
+        .from('found_items')
+        .insert([{
+            user_id: userId,
+            name: itemName,
+            category: category,
+            description: description,
+            color: color,
+            size: size,
+            date_found: dateFound,
+            location: locationFound,
+            city: cityFound,
+            state: stateFound,
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            condition: itemCondition,
+            image_url: imageUrl
+        }]);
+
+    submitBtn.classList.remove('loading');
+    if(!error) {
+        showMessage("Found item reported successfully! Redirecting to dashboard...", "success");
+        submitBtn.textContent = '✅ Success!';
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 2000);
+    } else {
+        console.error('Supabase Error:', error);
+        showMessage(error.message || "Failed to report found item", "error");
+        submitBtn.textContent = '🚀 Submit Found Item Report';
+    }
+}
+
+function showMessage(text, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
+
+    // Auto-hide after 5 seconds for success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Initialize page based on URL parameters
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get('type');
+
+    if (type === 'found') {
+        // Update page for found items
+        document.getElementById('pageTitle').textContent = 'Report Found Item';
+        document.getElementById('formTitle').textContent = '🔍 Report Found Item';
+        document.querySelector('.form-header p').textContent = 'Help reunite someone with their lost belongings';
+
+        // Update form elements
+        document.getElementById('locationLost').placeholder = 'Location Found';
+        document.getElementById('locationLost').id = 'locationFound';
+        document.getElementById('cityLost').placeholder = 'City where item was found';
+        document.getElementById('cityLost').id = 'cityFound';
+        document.getElementById('dateLost').id = 'dateFound';
+        document.getElementById('submitBtn').textContent = '🚀 Submit Found Item Report';
+
+        // Change form handler
+        document.getElementById('itemForm').onsubmit = handleFoundItem;
+    }
+
+    // Add navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (navbar && window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else if (navbar) {
+            navbar.classList.remove('scrolled');
+        }
+    });
+});
+</script>.remove('scrolled');
+        }
+    });
+});
+
+</script>

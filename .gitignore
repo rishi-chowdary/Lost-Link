@@ -1,0 +1,28 @@
+# IDE settings
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node modules (if using any node tools)
+node_modules/
+npm-debug.log
+
+# Database files (if local testing)
+*.db
+*.sqlite
