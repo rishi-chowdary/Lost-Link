@@ -627,3 +627,110 @@ input:focus {
     opacity: 1;
     color: #ff4757;
 }
+
+/* RESPONSIVE HAMBURGER NAVIGATION BAR */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 0;
+    margin-left: 15px;
+}
+
+.nav-toggle .bar {
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-primary);
+    border-radius: 1px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-toggle.active .bar:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.nav-toggle.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle.active .bar:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+@media (max-width: 1024px) {
+    .navbar {
+        padding: 1rem 5%;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--bg-gradient);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-bottom: 1px solid var(--glass-border);
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1.5rem;
+        gap: 1.25rem;
+        transform: translateY(-150%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .nav-links a {
+        font-size: 1.1rem;
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-links a:last-of-type {
+        border-bottom: none;
+    }
+
+    .notification-bell-container {
+        margin: 0.5rem 0;
+    }
+
+    /* Fixed full screen notification modal for mobile screens */
+    .notification-dropdown {
+        position: fixed !important;
+        top: 75px !important;
+        left: 5% !important;
+        right: 5% !important;
+        width: 90% !important;
+        max-width: none !important;
+        transform: scale(0.95) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    .notification-dropdown.active {
+        transform: scale(1) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}

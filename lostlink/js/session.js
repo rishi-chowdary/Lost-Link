@@ -163,6 +163,40 @@ class SessionManager {
 
         this.updateHeroButtons();
         applySavedTheme();
+
+        // Dynamic Hamburger Menu Toggle for Responsive Viewports
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            const existingToggle = navbar.querySelector('.nav-toggle');
+            if (existingToggle) existingToggle.remove();
+
+            const toggle = document.createElement('button');
+            toggle.className = 'nav-toggle';
+            toggle.setAttribute('aria-label', 'Toggle Navigation');
+            toggle.innerHTML = `
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            `;
+            
+            toggle.onclick = (e) => {
+                e.stopPropagation();
+                toggle.classList.toggle('active');
+                const links = document.querySelector('.nav-links');
+                if (links) links.classList.toggle('active');
+            };
+            
+            navbar.appendChild(toggle);
+            
+            // Close menu when clicking anywhere else
+            document.addEventListener('click', (e) => {
+                const links = document.querySelector('.nav-links');
+                if (links && links.classList.contains('active') && !navbar.contains(e.target)) {
+                    links.classList.remove('active');
+                    toggle.classList.remove('active');
+                }
+            });
+        }
     }
 
     static updateHeroButtons() {
