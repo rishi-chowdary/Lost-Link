@@ -246,6 +246,74 @@
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
         }
+
+        /* MOBILE & TABLET RESPONSIVE MESSENGER */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .messenger-container {
+                margin: 80px 0 0 0;
+                width: 100%;
+                height: calc(100vh - 80px);
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                display: flex;
+            }
+
+            .chat-window {
+                width: 100%;
+                display: none;
+            }
+
+            /* Toggle visibility when a chat is active */
+            .messenger-container.chat-active .sidebar {
+                display: none;
+            }
+
+            .messenger-container.chat-active .chat-window {
+                display: flex;
+            }
+
+            /* Adjust paddings and sizes for mobile */
+            .chat-header {
+                padding: 15px 20px;
+            }
+
+            .chat-messages {
+                padding: 20px;
+                gap: 15px;
+            }
+
+            .chat-input-area {
+                padding: 15px 20px;
+            }
+
+            .message {
+                max-width: 85%;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .sidebar-header {
+                padding: 20px;
+            }
+
+            .chat-item {
+                padding: 15px 20px;
+            }
+
+            .back-btn {
+                display: inline-flex !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -279,6 +347,7 @@
             <div id="activeChat" style="display: none; height: 100%; flex-direction: column;">
                 <div class="chat-header">
                     <div style="display: flex; align-items: center; gap: 15px;">
+                        <button type="button" class="back-btn" onclick="closeChat()" style="display: none; background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding-right: 10px; align-items: center; justify-content: center;">←</button>
                         <div class="chat-avatar" id="activeAvatar">👤</div>
                         <div>
                             <h4 id="activeName">Select a contact</h4>
@@ -388,6 +457,9 @@
             document.getElementById('activeChat').style.display = 'flex';
             document.getElementById('activeName').textContent = name;
             document.getElementById('activeAvatar').textContent = name.charAt(0);
+            
+            // Set mobile active panel state
+            document.querySelector('.messenger-container').classList.add('chat-active');
             
             // Check if user is already in sidebar
             const existingChat = Array.from(document.querySelectorAll('.chat-info h4'))
@@ -517,6 +589,18 @@
                 appendMessage(data[0], 'sent');
                 input.value = '';
             }
+        }
+
+        function closeChat() {
+            document.querySelector('.messenger-container').classList.remove('chat-active');
+            activeRecipientId = null;
+            // Clear URL search params so returning to list is clean
+            window.history.pushState({}, document.title, window.location.pathname);
+            
+            // Remove active highlighting from sidebar chats
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
         }
     </script>
 </body>
