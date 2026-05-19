@@ -138,6 +138,13 @@
             if (error) {
                 errorDiv.innerText = error.message;
             } else if (data.user) {
+                // Supabase returns an empty identities array if the email is already taken 
+                // (when email confirmations are enabled, to prevent enumeration)
+                if (data.user.identities && data.user.identities.length === 0) {
+                    errorDiv.innerText = 'An account with this email already exists. Please log in.';
+                    return;
+                }
+                
                 errorDiv.className = 'message success';
                 errorDiv.innerText = 'Account created! Please check your email for verification.';
                 // Supabase handles email verification by sending a link. 
