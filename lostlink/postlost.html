@@ -743,6 +743,24 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('dateLost').id = 'dateFound';
         document.getElementById('submitBtn').textContent = '🚀 Submit Found Item Report';
 
+        // Update corresponding labels
+        const dateLabel = document.querySelector('label[for="dateLost"]');
+        if (dateLabel) {
+            dateLabel.textContent = 'Date Found';
+            dateLabel.setAttribute('for', 'dateFound');
+        }
+        
+        const locationLabel = document.querySelector('label[for="locationLost"]');
+        if (locationLabel) {
+            locationLabel.textContent = 'Location Found';
+            locationLabel.setAttribute('for', 'locationFound');
+        }
+
+        const cityLabel = document.querySelector('label[for="cityLost"]');
+        if (cityLabel) {
+            cityLabel.setAttribute('for', 'cityFound');
+        }
+
         // Change form handler
         document.getElementById('itemForm').onsubmit = handleFoundItem;
     }

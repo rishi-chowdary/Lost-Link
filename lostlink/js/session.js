@@ -61,11 +61,19 @@ class SessionManager {
         return this.currentUser?.email || localStorage.getItem('userEmail');
     }
 
-    static async logout() {
-        await supabase.auth.signOut();
+    static async logout(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.error('Supabase signout error:', e);
+        }
         localStorage.removeItem('userId');
         localStorage.removeItem('userEmail');
         localStorage.removeItem('userName');
+        localStorage.removeItem('isAdmin');
         window.location.href = 'index.html';
     }
 
@@ -118,7 +126,7 @@ class SessionManager {
                 ${isAdmin 
                     ? '<a href="admin.html" style="color: var(--accent); font-weight: 700;">Admin</a>' 
                     : '<a href="complaint.html">Complaint</a>'}
-                <a href="#" onclick="SessionManager.logout()">Logout</a>
+                <a href="#" onclick="SessionManager.logout(event)">Logout</a>
                 <a href="#" onclick="toggleTheme()" id="themeToggle" class="theme-icon">🌙</a>
             `;
         } else {

@@ -1107,6 +1107,7 @@
 
                 const status = item.type === 'lost' ? 'Lost' : 'Found';
                 const timeAgo = getTimeAgo(item.date);
+                const icon = getItemIcon(item.category);
 
                 const mediaContent = item.image_url 
                     ? `<img src="${item.image_url}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`
