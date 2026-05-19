@@ -254,9 +254,9 @@
             }
 
             .messenger-container {
-                margin: 80px 0 0 0;
+                margin: 70px 0 0 0;
                 width: 100%;
-                height: calc(100vh - 80px);
+                height: calc(100dvh - 70px);
                 border-radius: 0;
                 border: none;
                 box-shadow: none;
@@ -271,6 +271,14 @@
             .chat-window {
                 width: 100%;
                 display: none;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            #activeChat {
+                height: 100% !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
             }
 
             /* Toggle visibility when a chat is active */
@@ -288,12 +296,15 @@
             }
 
             .chat-messages {
-                padding: 20px;
+                padding: 15px !important;
                 gap: 15px;
+                flex: 1 !important;
+                overflow-y: auto !important;
             }
 
             .chat-input-area {
-                padding: 15px 20px;
+                padding: 12px 15px !important;
+                background: rgba(0, 0, 0, 0.4) !important;
             }
 
             .message {
