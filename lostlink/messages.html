@@ -428,8 +428,18 @@
                     schema: 'public', 
                     table: 'messages',
                     filter: `sender_id=eq.${recipientId},receiver_id=eq.${currentUser.id}`
-                }, payload => {
+                }, async (payload) => {
                     appendMessage(payload.new, 'received');
+                    
+                    // Mark as read in DB immediately
+                    try {
+                        await supabase
+                            .from('messages')
+                            .update({ is_read: true })
+                            .eq('id', payload.new.id);
+                    } catch (e) {
+                        console.error('Error marking message as read:', e);
+                    }
                 })
                 .subscribe();
         }
@@ -448,6 +458,29 @@
                 appendMessage(msg, type);
             });
             flow.scrollTop = flow.scrollHeight;
+
+            // Mark received messages as read in DB
+            try {
+                await supabase
+                    .from('messages')
+                    .update({ is_read: true })
+                    .eq('sender_id', recipientId)
+                    .eq('receiver_id', currentUser.id)
+                    .eq('is_read', false);
+            } catch (e) {
+                console.warn('DB error marking read:', e);
+            }
+
+            // Sync navbar notifications count locally
+            if (typeof SessionManager !== 'undefined' && SessionManager.unreadMessages) {
+                const prevLength = SessionManager.unreadMessages.length;
+                SessionManager.unreadMessages = SessionManager.unreadMessages.filter(msg => msg.sender_id !== recipientId);
+                const removedCount = prevLength - SessionManager.unreadMessages.length;
+                if (removedCount > 0) {
+                    SessionManager.unreadCount = Math.max(0, SessionManager.unreadCount - removedCount);
+                    SessionManager.updateBadgeUI();
+                }
+            }
         }
 
         function appendMessage(msg, type) {

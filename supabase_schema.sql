@@ -79,6 +79,7 @@ CREATE TABLE messages (
     sender_id UUID REFERENCES profiles(id),
     receiver_id UUID REFERENCES profiles(id),
     content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 

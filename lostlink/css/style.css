@@ -347,3 +347,283 @@ input:focus {
         padding: 1rem 5%;
     }
 }
+
+/* ==========================================
+   NOTIFICATION SYSTEM STYLES
+   ========================================== */
+
+/* Notification Bell Container */
+.notification-bell-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    padding: 5px;
+}
+
+.notification-bell-container:hover {
+    transform: scale(1.1);
+}
+
+.notification-bell-container .bell-icon {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+}
+
+.notification-bell-container:hover .bell-icon {
+    opacity: 1;
+}
+
+/* Red Badge Count */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+    animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(255, 71, 87, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+/* Notification Dropdown Menu */
+.notification-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 320px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    transform-origin: top right;
+    animation: dropdownEntrance 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notification-dropdown.active {
+    display: flex;
+}
+
+@keyframes dropdownEntrance {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.notification-dropdown-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-dropdown-header h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.notification-dropdown-header .mark-read-btn {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.notification-dropdown-header .mark-read-btn:hover {
+    text-decoration: underline;
+}
+
+.notification-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.notification-item-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--accent) 0%, #ff6b6b 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #1e1b4b;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.notification-item-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.notification-item-content h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-item-content p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-dropdown-footer {
+    padding: 12px;
+    text-align: center;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.notification-dropdown-footer a {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.notification-dropdown-footer a:hover {
+    color: var(--accent);
+}
+
+/* Floating Real-time Toast Notifications */
+.toast-notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast-notification {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 15px 20px;
+    width: 320px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    pointer-events: auto;
+    cursor: pointer;
+    animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s ease;
+}
+
+.toast-notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border-color: var(--accent);
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(100px) scale(0.9); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.toast-notification.fade-out {
+    opacity: 0;
+    transform: translateX(100px) scale(0.9);
+    pointer-events: none;
+}
+
+.toast-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent) 0%, #ff6b6b 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #1e1b4b;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.toast-body {
+    flex: 1;
+    overflow: hidden;
+}
+
+.toast-body h5 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.toast-body p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toast-close {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+    border: none;
+    background: transparent;
+    padding: 5px;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    color: #ff4757;
+}
