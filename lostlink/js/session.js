@@ -143,7 +143,10 @@ class SessionManager {
                 </div>
                 <span class="island-sep"></span>
                 <a href="profile.html" ${activeLink('profile.html')}>Profile</a>
-                ${isAdmin ? '<a href="admin.html" style="color:var(--accent-bright);font-weight:700;">Admin</a>' : ''}
+                ${isAdmin
+                    ? `<a href="admin.html" ${activeLink('admin.html')} style="color:var(--accent-bright);font-weight:700;">⚙️ Admin</a>`
+                    : `<a href="complaint.html" ${activeLink('complaint.html')} style="color:#f59e0b;font-weight:600;">📝 Complaint</a>`
+                }
                 <a href="#" onclick="SessionManager.logout(event)" style="color:rgba(239,68,68,0.8);">Logout</a>
             `;
 
@@ -198,6 +201,7 @@ class SessionManager {
         const isLoggedIn = this.isLoggedIn();
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
         const links = isLoggedIn
             ? [
                 { href:'index.html', label:'Home' },
@@ -207,6 +211,10 @@ class SessionManager {
                 { href:'postlost.html?type=found', label:'Report Found' },
                 { href:'messages.html', label:'Inbox' },
                 { href:'profile.html', label:'Profile' },
+                ...(isAdmin
+                    ? [{ href:'admin.html', label:'⚙️ Admin' }]
+                    : [{ href:'complaint.html', label:'📝 Complaint' }]
+                ),
               ]
             : [
                 { href:'index.html', label:'Home' },

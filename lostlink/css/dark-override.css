@@ -403,16 +403,40 @@ p, span, div { color: inherit; }
     --input-bg: rgba(255,255,255,0.05) !important;
 }
 
-/* ─── MOBILE ─────────────────────────────────── */
+/* ─── MOBILE & TABLET (Next-Level UI) ────────── */
 @media (max-width: 768px) {
     .navbar {
         top: 12px !important;
         padding: 8px 14px 8px 12px !important;
+        width: calc(100% - 32px) !important;
     }
 
     .nav-links { display: none !important; }
     .island-sep { display: none !important; }
     .nav-toggle { display: flex !important; }
 
-    .main { padding: 80px 16px 40px !important; }
+    .main, .dashboard-main, .community-main,
+    .page-content, .content-wrapper,
+    .report-container, .complaint-container,
+    .profile-container, .admin-container { 
+        padding: 90px 16px 40px !important; 
+    }
+
+    /* Refine Typography & Spacing */
+    .section-title, .page-title, h1 { font-size: 2.2rem !important; line-height: 1.2 !important; }
+    
+    /* Refine Grids on Mobile */
+    .stats-grid, .actions-grid, .items-grid, .community-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    /* Better padding for cards on mobile */
+    .glass, .stat-card, .item-card, .post-card,
+    .dashboard-card, .form-card, .community-card,
+    .profile-card, .report-card, .filter-card,
+    [class*="-card"], [class*="glass"] {
+        padding: 20px !important;
+        border-radius: 16px !important;
+    }
 }

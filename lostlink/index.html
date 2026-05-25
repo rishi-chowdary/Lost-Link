@@ -304,12 +304,21 @@
             margin-top: 12px;
         }
 
-        @media (max-width: 600px) {
-            .stats-row { flex-direction: column; gap: 0; }
+        @media (max-width: 768px) {
+            .hero { padding-top: 120px; }
+            .hero h1 { font-size: clamp(2.8rem, 8vw, 4rem); line-height: 1.1; }
+            .hero .subtitle { font-size: 1rem; padding: 0 10px; margin-bottom: 2rem; }
+            .stats-row { flex-direction: column; gap: 0; margin-bottom: 2rem; }
             .stat-pill:first-child  { border-radius: 16px 16px 0 0; }
             .stat-pill:last-child   { border-radius: 0 0 16px 16px; }
-            .stat-pill + .stat-pill { border-left: 1px solid var(--glass-border); border-top: none; }
-            .hero-cta { flex-direction: column; align-items: center; }
+            .stat-pill + .stat-pill { border-left: none; border-top: 1px solid var(--glass-border); }
+            
+            .hero-cta { flex-direction: column; align-items: stretch; gap: 12px; padding: 0 20px; }
+            .hero-cta a { width: 100%; justify-content: center; display: flex; }
+            
+            .features-section { padding: 60px 5%; }
+            .section-title { font-size: 2.2rem; margin-bottom: 40px; line-height: 1.2; }
+            .mock-card { max-width: 100%; margin: 0 20px; }
         }
     </style>
 </head>
