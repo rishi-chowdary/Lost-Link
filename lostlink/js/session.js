@@ -415,8 +415,12 @@ class SessionManager {
                 this.unreadCount++;
                 this.updateBadgeUI();
 
-                // Show toast notification
-                this.showNotificationToast(senderName, payload.new.content, payload.new.sender_id);
+                // Show toast notification — display '🔒 New message' since we can't
+                // decrypt ciphertext outside messages.html (no key context)
+                const displayText = _isEncryptedContent(payload.new.content)
+                    ? '🔒 New message'
+                    : payload.new.content;
+                this.showNotificationToast(senderName, displayText, payload.new.sender_id);
             })
             .subscribe();
     }
@@ -489,7 +493,7 @@ class SessionManager {
                 <div class="notification-item-avatar">${senderName.charAt(0).toUpperCase()}</div>
                 <div class="notification-item-content">
                     <h5>${senderName}</h5>
-                    <p>${msg.content}</p>
+                    <p>${_isEncryptedContent(msg.content) ? '🔒 New message' : msg.content}</p>
                 </div>
             `;
             list.appendChild(item);
@@ -522,6 +526,16 @@ class SessionManager {
             console.error('Error marking all as read:', e);
         }
     }
+}
+
+// Helper: detect if a message content string is AES-GCM ciphertext
+// Format: base64(IV) + ':' + base64(ciphertext)
+function _isEncryptedContent(text) {
+    if (typeof text !== 'string') return false;
+    const idx = text.indexOf(':');
+    if (idx < 10 || idx > 20) return false;
+    return /^[A-Za-z0-9+/=]+$/.test(text.slice(0, idx)) &&
+           /^[A-Za-z0-9+/=]{10,}$/.test(text.slice(idx + 1));
 }
 
 // Theme is always dark — no toggle needed

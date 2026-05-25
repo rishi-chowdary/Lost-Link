@@ -585,6 +585,7 @@
 <div id="inboxToastContainer"></div>
 
 <script src="js/supabase.js"></script>
+<script src="js/crypto.js"></script>
 <script src="js/session.js"></script>
 <script>
     'use strict';
@@ -650,10 +651,16 @@
                 const msg      = payload.new;
                 const senderId = msg.sender_id;
 
+                // Decrypt the incoming ciphertext
+                const plaintext = await MsgCrypto.decryptMessage(
+                    msg.content, msg.sender_id, msg.receiver_id
+                );
+                const decryptedMsg = { ...msg, content: plaintext };
+
                 if (senderId === activeRecipientId) {
                     // ── Active chat: show immediately, mark read ──
-                    appendBubble(msg, 'received');
-                    refreshSidebarItem(senderId, msg.content, msg.created_at);
+                    appendBubble(decryptedMsg, 'received');
+                    refreshSidebarItem(senderId, plaintext, msg.created_at);
                     try { await supabase.from('messages').update({ is_read: true }).eq('id', msg.id); } catch (_) {}
                 } else {
                     // ── Different chat: unread badge + toast ──
@@ -662,9 +669,9 @@
                     } else {
                         const { data: profile } = await supabase
                             .from('profiles').select('full_name').eq('id', senderId).single();
-                        addSidebarItem(senderId, profile?.full_name || 'Community Member', msg.content, msg.created_at, 1);
+                        addSidebarItem(senderId, profile?.full_name || 'Community Member', plaintext, msg.created_at, 1);
                     }
-                    refreshSidebarItem(senderId, msg.content, msg.created_at);
+                    refreshSidebarItem(senderId, plaintext, msg.created_at);
                     bumpToTop(senderId);
 
                     // Bell badge ONLY for fresh real-time messages
@@ -672,7 +679,7 @@
                         SessionManager.unreadCount = (SessionManager.unreadCount || 0) + 1;
                         SessionManager.updateBadgeUI?.();
                     }
-                    showInboxToast(sidebarMap[senderId]?.name || 'Someone', msg.content, senderId);
+                    showInboxToast(sidebarMap[senderId]?.name || 'Someone', plaintext, senderId);
                 }
 
                 if (sidebarMap[senderId] && senderId !== activeRecipientId) bumpToTop(senderId);
@@ -724,11 +731,13 @@
         // Sort by most recent
         peerIds.sort((a, b) => new Date(convMap[b].created_at) - new Date(convMap[a].created_at));
 
-        peerIds.forEach(uid => {
-            const msg  = convMap[uid];
-            const name = profileMap[uid] || 'Community Member';
-            addSidebarItem(uid, name, msg.content, msg.created_at, unreadMap[uid] || 0);
-        });
+        // Decrypt last-message previews for sidebar
+        await Promise.all(peerIds.map(async uid => {
+            const msg     = convMap[uid];
+            const name    = profileMap[uid] || 'Community Member';
+            const preview = await MsgCrypto.decryptMessage(msg.content, msg.sender_id, msg.receiver_id);
+            addSidebarItem(uid, name, preview, msg.created_at, unreadMap[uid] || 0);
+        }));
     }
 
     /* ════════════════════════════════════════════════
@@ -844,8 +853,9 @@
             }, async (payload) => {
                 const msg = payload.new;
                 if (msg.sender_id === recipientId) {
-                    appendBubble(msg, 'received');
-                    refreshSidebarItem(recipientId, msg.content, msg.created_at);
+                    const plaintext = await MsgCrypto.decryptMessage(msg.content, msg.sender_id, msg.receiver_id);
+                    appendBubble({ ...msg, content: plaintext }, 'received');
+                    refreshSidebarItem(recipientId, plaintext, msg.created_at);
                     bumpToTop(recipientId);
                     try { await supabase.from('messages').update({ is_read: true }).eq('id', msg.id); } catch (_) {}
                 }
@@ -864,6 +874,9 @@
             .select('*')
             .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${currentUser.id})`)
             .order('created_at', { ascending: true });
+
+        // Decrypt all messages before rendering
+        await MsgCrypto.decryptMessages(messages || []);
 
         (messages || []).forEach(msg =>
             appendBubble(msg, msg.sender_id === currentUser.id ? 'sent' : 'received')
@@ -938,19 +951,23 @@
     ════════════════════════════════════════════════ */
     async function sendMessage(e) {
         e.preventDefault();
-        const input   = document.getElementById('messageInput');
-        const content = input.value.trim();
-        if (!content || !activeRecipientId) return;
+        const input     = document.getElementById('messageInput');
+        const plaintext = input.value.trim();
+        if (!plaintext || !activeRecipientId) return;
         input.value = '';
+
+        // Encrypt before storing in DB
+        const ciphertext = await MsgCrypto.encryptMessage(plaintext, currentUser.id, activeRecipientId);
 
         const { data, error } = await supabase
             .from('messages')
-            .insert([{ sender_id: currentUser.id, receiver_id: activeRecipientId, content }])
+            .insert([{ sender_id: currentUser.id, receiver_id: activeRecipientId, content: ciphertext }])
             .select();
 
         if (!error && data?.[0]) {
-            appendBubble(data[0], 'sent');
-            refreshSidebarItem(activeRecipientId, content, data[0].created_at);
+            // Show plaintext locally (no need to decrypt what we just encrypted)
+            appendBubble({ ...data[0], content: plaintext }, 'sent');
+            refreshSidebarItem(activeRecipientId, plaintext, data[0].created_at);
             bumpToTop(activeRecipientId);
         }
     }
